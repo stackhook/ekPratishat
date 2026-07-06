@@ -75,7 +75,7 @@ export async function createListingFunction({
 );
 
   const { images: _images, lat, lng, ...data } = parsed.data;
-  console.log(data);
+  
 
   try {
     const listing = await prisma.$transaction(async (tx) => {
@@ -108,7 +108,8 @@ export async function createListingFunction({
     "floorLevel",
     "tole",
     "geoPoint",
-    "features"
+    "features",
+    "handlerId"
   )
   VALUES (
     ${propertyId},
@@ -134,7 +135,9 @@ export async function createListingFunction({
     ${data.floorLevel},
     ${data.tole},
     ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326),
-    ${data.features ? JSON.parse(data.features) : null}
+    ${data.features ? JSON.parse(data.features) : null},
+    ${body.userId}
+
   )
   RETURNING
     "id",

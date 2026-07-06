@@ -38,6 +38,12 @@ export default async function RelatedProperties({
             isFeatured:true,
             noOfFloors: true,
             noOfRestRooms: true,
+            coverImage: {
+                select: {
+                    id:true,
+                    url:true,
+                }
+            },
             landArea: true,
             floorArea: true,
             tole: true,
@@ -48,6 +54,7 @@ export default async function RelatedProperties({
             },
             images: {
                 select: {
+                    id:true,
                     url: true,
                 },
                 take: 1,

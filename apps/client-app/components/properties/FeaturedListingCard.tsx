@@ -38,7 +38,7 @@ export default function PremiumListingCard({ listing }: { listing: PropertyListi
                 </div>
               </div>
             </div>
-            </div>
+          </div>
 
         )}
 
@@ -46,10 +46,10 @@ export default function PremiumListingCard({ listing }: { listing: PropertyListi
         <div className="relative h-56 w-full overflow-hidden flex-shrink-0">
           {/* Premium Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/42 via-transparent to-transparent z-10"></div>
-
-          {listing.images?.[0]?.url ? (
+          {listing.coverImage?.url || listing.images?.[0]?.url ? (
             <Image
-              src={`${process.env.NEXT_PUBLIC_BASE_URL}${listing.images[0].url}`}
+              src={`${process.env.NEXT_PUBLIC_BASE_URL}${listing.coverImage?.url || listing.images?.[0]?.url
+                }`}
               alt={listing.title}
               fill
               className="object-cover transition-transform duration-700 transform-gpu group-hover:scale-105"

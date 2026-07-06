@@ -56,8 +56,13 @@ export interface PropertyListing {
     name: string;
   };
   images: {
+    id:string;
     url: string;
   }[];
+  coverImage: {
+    id:string;
+    url:string;
+  } | null;
   createdAt: Date | string;
 }
 

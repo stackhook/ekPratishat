@@ -52,6 +52,8 @@ export async function PropertyListingSection({
 
   const listings = response.items.slice(0, 6);
 
+  console.log(listings);
+
   return (
     <section
       className={

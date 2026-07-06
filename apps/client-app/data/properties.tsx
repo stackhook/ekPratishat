@@ -43,6 +43,12 @@ export const _getProperties = async (input: Input) => {
                 price: true,
                 type: true,
                 noOfBedRooms: true,
+                coverImage: {
+                    select: {
+                        id:true,
+                        url:true
+                    }
+                },
                 noOfFloors: true,
                 noOfRestRooms: true,
                 isFeatured: true,
@@ -56,6 +62,7 @@ export const _getProperties = async (input: Input) => {
                 },
                 images: {
                     select: {
+                        id: true,
                         url: true,
                     },
                     take: 1,
