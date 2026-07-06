@@ -354,7 +354,7 @@ export const toggleActive = async (req: Request, res: Response) => {
           },
         }),
       ]);
-      triggerFrontendUpdate("properties");
+      triggerFrontendUpdate({tag: "properties"});
     } else if (!activeStatus) {
       const result = await prisma.user.update({
         where: { id: agentId },
@@ -381,7 +381,7 @@ export const toggleActive = async (req: Request, res: Response) => {
           },
         },
       });
-      triggerFrontendUpdate("properties");
+      triggerFrontendUpdate({tag: "properties"});
     }
 
     return res.status(200).json({

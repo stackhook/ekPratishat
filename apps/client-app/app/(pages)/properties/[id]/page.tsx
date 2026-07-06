@@ -115,6 +115,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             noOfBedRooms: true,
             noOfRestRooms: true,
             landArea: true,
+            coverImage: {
+                select: {
+                    id:true,
+                    url:true
+                }
+            },
             noOfFloors: true,
             propertyAge: true,
             facingDirection: true,
@@ -133,6 +139,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             createdAt: true,
             images: {
                 select: {
+                    id:true,
                     url: true
                 }
             },

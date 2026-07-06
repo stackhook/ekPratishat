@@ -1,5 +1,5 @@
-export const triggerFrontendUpdate = async (tag = "") => {
-  const url = `${process.env.FRONTEND_URL}/api/revalidate?secret=${process.env.REVALIDATE_SECRET}${tag ? `&tag=${tag}` : ""}`;
+export const triggerFrontendUpdate = async ({tag = "",path=""}) => {
+  const url = `${process.env.FRONTEND_URL}/api/revalidate?secret=${process.env.REVALIDATE_SECRET}${tag ? `&tag=${tag}` : ""}${path ? `&path=${path}` : ""}`;
   
   try {
     const res = await fetch(url, { method: 'POST' });
@@ -8,4 +8,4 @@ export const triggerFrontendUpdate = async (tag = "") => {
   } catch (error) {
     console.error("Failed to notify frontend:", error);
   }
-};
+};  

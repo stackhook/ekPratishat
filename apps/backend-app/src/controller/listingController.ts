@@ -46,7 +46,7 @@ export async function createCategory(req: Request, res: Response) {
       file: adaptedFile,
     });
 
-    triggerFrontendUpdate("categories");
+    triggerFrontendUpdate({tag: "categories"});
 
     return res.status(201).json({
       ok: true,
@@ -86,7 +86,7 @@ export const updateCategory = async (req: Request, res: Response) => {
       categoryId: id as string,
     });
 
-    triggerFrontendUpdate("categories");
+    triggerFrontendUpdate({tag: "categories"});
 
     return res.status(result.status).json({
       message: result.message || "Opeartion Successful",
@@ -165,10 +165,10 @@ export const addProperty = async (req: Request, res: Response) => {
     });
 
     if (result.listing.verified) {
-      triggerFrontendUpdate("properties");
+      triggerFrontendUpdate({tag: "properties"});
     }
 
-    triggerFrontendUpdate(`listings-${result.listing.userId}`);
+    triggerFrontendUpdate({tag: `listings-${result.listing.userId}`});
 
     return res.status(201).json({
       ok: true,
@@ -268,8 +268,8 @@ export async function verifyListing(req: Request, res: Response) {
       },
     });
 
-    triggerFrontendUpdate("properties");
-    triggerFrontendUpdate(`listings-${result.userId}`);
+    triggerFrontendUpdate({tag: "properties"});
+    triggerFrontendUpdate({tag: `listings-${result.userId}`});
 
     return res.status(200).json({
       message: "Property Verified!!!",
@@ -300,8 +300,8 @@ export async function featureListing(req: Request, res: Response) {
       data: { isFeatured: !isFeatured },
     });
 
-    triggerFrontendUpdate("properties");
-    triggerFrontendUpdate(`listings-${result.userId}`);
+    triggerFrontendUpdate({tag: "properties"});
+    triggerFrontendUpdate({tag: `listings-${result.userId}`});
 
     return res.status(200).json({
       message: "Property Featured Successfully!!!",
@@ -637,9 +637,9 @@ export async function updateProperty(req: Request, res: Response) {
     });
 
     if (user.role === "admin") {
-      triggerFrontendUpdate("properties");
-      triggerFrontendUpdate(`listings-${result.ownerId}`);
-      triggerFrontendUpdate("favourite");
+      triggerFrontendUpdate({tag:"properties"});
+      triggerFrontendUpdate({tag:`listings-${result.ownerId}`});
+      triggerFrontendUpdate({tag:"favourite"});
     }
 
     return res.status(200).json({
@@ -751,9 +751,9 @@ export async function toggleActivateListing(req: Request, res: Response) {
       });
     });
 
-    triggerFrontendUpdate("properties");
-    triggerFrontendUpdate("favourite");
-    triggerFrontendUpdate(`listings-${result.userId}`);
+    triggerFrontendUpdate({tag: "properties"});
+    triggerFrontendUpdate({tag: "favourite"});
+    triggerFrontendUpdate({tag: `listings-${result.userId}`});
 
     return res.status(200).json({
       message: "Listing status updated successfully",
@@ -982,6 +982,8 @@ export async function updateCoverImage(req: Request, res: Response) {
         coverImageId: coverId as string,
       },
     });
+
+    triggerFrontendUpdate({tag: "properties"});
 
     return res.status(200).json({
       message: "Cover Image updated Successfully!!!",

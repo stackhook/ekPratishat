@@ -5,6 +5,7 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const secret = searchParams.get('secret');
   const tag = searchParams.get('tag');
+  const path = searchParams.get('path');
 
   // 1. Security Check
   if (secret !== process.env.REVALIDATE_SECRET) {
@@ -13,9 +14,14 @@ export async function POST(request: NextRequest) {
 
   // 2. Perform Revalidation
   try {
-    if (tag) {
-      revalidateTag(tag); // Targets specific data
-      return NextResponse.json({ revalidated: true, tag, now: Date.now() });
+    if (tag || path) {
+      if (tag) {
+        revalidateTag(tag);
+      }
+      if (path) {
+        revalidatePath(path);
+      }
+      return NextResponse.json({ revalidated: true, tag, path, now: Date.now() });
     }
     
     // Fallback: Clear the whole homepage cache

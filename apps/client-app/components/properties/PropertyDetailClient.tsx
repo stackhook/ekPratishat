@@ -1,7 +1,7 @@
 // app/property/[id]/property-detail-client.tsx
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import {
   ShareIcon,
@@ -23,12 +23,13 @@ export type PropertyData = {
   price: string;
   negotiable: boolean,
   amenities: { id: string; name: string; icon: string }[];
-  features:unknown;
+  features: unknown;
   type: string;
   category: { name: string } | null
   isFeatured: boolean;
   noOfBedRooms: number | null;
   noOfRestRooms: number | null;
+  coverImage: { id: string; url: string } | null;
   landArea: string | null;
   noOfFloors: number | null;
   propertyAge: number | null;
@@ -38,7 +39,7 @@ export type PropertyData = {
   floorLevel: number | null;
   tole: string | null;
   createdAt: Date;
-  images: { url: string }[];
+  images: { id: string; url: string }[];
   location: {
     name: string;
     municipality: {
@@ -77,24 +78,24 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
   });
 
   const handleShare = async () => {
-  const shareData = {
-    title: property.title,
-    text: `Check out this property on Ek Pratisat: ${property.title}`,
-    url: window.location.href, // Current page URL
-  };
+    const shareData = {
+      title: property.title,
+      text: `Check out this property on Ek Pratisat: ${property.title}`,
+      url: window.location.href, // Current page URL
+    };
 
-  if (navigator.share) {
-    try {
-      await navigator.share(shareData);
-    } catch (err) {
-      console.log("Share failed or cancelled", err);
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log("Share failed or cancelled", err);
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard!");
     }
-  } else {
-    // Fallback: Copy to clipboard
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Link copied to clipboard!");
-  }
-};
+  };
 
   // Location string
   const locationString = property.location
@@ -103,7 +104,31 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
 
   const toleString = property.tole ? `, ${property.tole}` : "";
 
-  const images = property.images.length > 0 ? property.images : [{ url: "/placeholder-property.jpg" }];
+  // const images = property.images.length > 0 ? property.images : [{ url: "/placeholder-property.jpg" }];
+  const images = useMemo(() => {
+    if (!property?.images || property.images.length === 0) {
+      return [{ url: "/placeholder-property.jpg" }];
+    }
+
+    // 🚀 Safe optional chaining evaluation eliminates the "possibly null" compiler error
+    const coverImageId = property?.coverImage?.id;
+
+    if (!coverImageId) {
+      return property.images;
+    }
+
+    // Find the target cover image object safely
+    const coverImg = property.images.find(img => img.id === coverImageId);
+
+    // Fallback protection if the relationship is broken or missing from the array
+    if (!coverImg) return property.images;
+
+    // Gather everything except the cover image
+    const otherImages = property.images.filter(img => img.id !== coverImageId);
+
+    // Return with the cover image cleanly occupying index 0
+    return [coverImg, ...otherImages];
+  }, [property?.images, property?.coverImage]);
 
   const openLightbox = useCallback((startIndex?: number) => {
     if (typeof startIndex === "number") setSelectedImage(startIndex);
@@ -158,7 +183,7 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
 
   return (
     <main className="min-h-screen bg-[#f7f3ea] text-[#10151f] transition-colors duration-200 dark:bg-[#171512] dark:text-[#f7f1e3]">
-    <div className="ek-nav-safe-page mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16">
+      <div className="ek-nav-safe-page mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16">
         {/* Header with actions */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
@@ -189,20 +214,7 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
           </div>
 
           <div className="flex gap-3">
-            {/* <button
-              onClick={() => setIsSaved(!isSaved)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-secondary-200 dark:border-secondary-700 hover:border-gold dark:hover:border-gold transition-all duration-200 bg-white dark:bg-secondary-800"
-            >
-              {isSaved ? (
-                <HeartSolidIcon className="w-5 h-5 text-red-500" />
-              ) : (
-                <HeartIcon className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
-              )}
-              <span className="text-secondary-700 dark:text-secondary-300">
-                {isSaved ? "Saved" : "Save"}
-              </span>
-            </button> */}
-            <FavouriteButton property={property}/>
+            <FavouriteButton property={property} />
             <button className="flex items-center gap-2 rounded-xl border border-[var(--ek-border-soft)] bg-[var(--ek-bg-card)] px-4 py-2 transition-colors duration-200 hover:border-[var(--ek-border-strong)] dark:border-[var(--ek-dark-border)] dark:bg-[var(--ek-dark-surface)] dark:hover:border-[var(--ek-dark-border-strong)]" onClick={handleShare}>
               <ShareIcon className="w-5 h-5 text-secondary-600 dark:text-secondary-400" />
               <span className="text-secondary-700 dark:text-secondary-300">Share</span>
@@ -266,11 +278,10 @@ export function PropertyDetailClient({ property }: PropertyDetailClientProps) {
                         ? `View ${overflowCount} more photo${overflowCount === 1 ? "" : "s"}`
                         : `Show image ${slot + 1} of ${images.length}`
                     }
-                    className={`relative aspect-square overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${
-                      isCurrent
-                        ? "ring-2 ring-gold ring-offset-2 dark:ring-offset-secondary-900"
-                        : "opacity-85 hover:opacity-100"
-                    }`}
+                    className={`relative aspect-square overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 ${isCurrent
+                      ? "ring-2 ring-gold ring-offset-2 dark:ring-offset-secondary-900"
+                      : "opacity-85 hover:opacity-100"
+                      }`}
                   >
                     <Image
                       src={`${process.env.NEXT_PUBLIC_BASE_URL}${image.url}`}
