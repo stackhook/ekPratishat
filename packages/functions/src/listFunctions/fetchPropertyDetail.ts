@@ -16,6 +16,14 @@ export async function fetchPropertyDetal(id: string) {
         createdAt: true,
         noOfBedRooms: true,
         noOfRestRooms: true,
+        handler: {
+          select: {
+            id:true,
+            name:true,
+            email:true,
+            contact:true
+          }
+        },
         negotiable: true,
         features: true,
         landArea: true,

@@ -361,3 +361,23 @@ export const useUpdateCategory = () => {
     }
   })
 }
+
+export const useChangePropertyHandler = () => {
+  return useMutation({
+    mutationFn: async ({propertyId,handlerId,reason}:{propertyId:string,handlerId:string,reason:string} ) => {
+       return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/change-handler/${propertyId}?handlerId=${handlerId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({reason})
+        },
+      );
+    },
+     onError: (error) => {
+      toast.error(error.message || "Operation Failed!!!");
+    }
+  })
+}

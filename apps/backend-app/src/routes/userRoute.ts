@@ -7,6 +7,7 @@ import { getAdminOrStaff, getStaff, getUsers } from "../controller/usersControll
 const userRouter = Router();
 
 userRouter.get("/get-all", checkAuthentication, requireAdmin, getUsers);
+userRouter.get("/get-staff", checkAuthentication, requireAdmin, getStaff);
 userRouter.get("/get-admin-staff", checkAuthentication, requireAdminOrStaff, getAdminOrStaff)
 
 export default userRouter;

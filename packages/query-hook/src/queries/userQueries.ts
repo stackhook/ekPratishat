@@ -145,3 +145,21 @@ export const useGetAdminStaff = (open: boolean) => {
     enabled: open,
   });
 };
+
+
+export const useGetStaff = (open: boolean) => {
+  return useQuery({
+    queryKey: ["all-staff"],
+    queryFn: async () => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/get-staff`,
+        { method: "GET" },
+      );
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+    retryDelay: 2000,
+    refetchOnWindowFocus: true,
+    enabled: open,
+  });
+};

@@ -14,7 +14,7 @@ import { ShieldAlert } from "lucide-react";
 interface HandlerProps {
     id: string;
     name: string;
-    role:string;
+    role: string;
 }
 
 
@@ -61,10 +61,10 @@ export default function ChangeHandler({ lead }: { lead: LeadDetailType }) {
                     queryKey: ["leads"]
                 });
                 queryClient.invalidateQueries({
-                    queryKey:["user-leads"]
+                    queryKey: ["user-leads"]
                 })
                 queryClient.invalidateQueries({
-                    queryKey:["followups-today"]
+                    queryKey: ["followups-today"]
                 })
                 setOpen(false);
             }
@@ -94,26 +94,55 @@ export default function ChangeHandler({ lead }: { lead: LeadDetailType }) {
                         </p>
 
                         {/* Dropdown Section */}
+
                         <div className="flex flex-col space-y-2">
-                            <label htmlFor="status-select" className="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                            <label htmlFor="handler-select" className="text-sm font-medium text-secondary-700 dark:text-secondary-300">
                                 Select New Handler
                             </label>
                             <select
                                 id="handler-select"
-                                value={handlerId!}
-                                onChange={(e) => {
-                                    setHandlerId(e.target.value);
-
-                                }}
-                                disabled={isPending}
-                                className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100"
+                                value={handlerId || ""}
+                                onChange={(e) => setHandlerId(e.target.value)}
+                                // 🚀 Disable interaction if data is loading or errored out
+                                disabled={isPending || isLoading || isError}
+                                className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-secondary-100 disabled:opacity-75 disabled:cursor-not-allowed"
                             >
-                                {/* <option value="">All</option> */}
-                                {data?.users?.map((handler: HandlerProps) => (
+                                {/* ⏳ Case 1: Loading State */}
+                                {isLoading && (
+                                    <option value="" className="animate-pulse">
+                                        ⏳ Loading staff directories...
+                                    </option>
+                                )}
+
+                                {/* ❌ Case 2: Error State */}
+                                {isError && (
+                                    <option value="" className="text-red-500 dark:text-red-400 font-medium">
+                                        ⚠️ {error?.message || "Failed to fetch admin staff."}
+                                    </option>
+                                )}
+
+                                {/* 👥 Case 3: Success State */}
+                                {/* {!isLoading && !isError && data?.users?.map((handler: HandlerProps) => (
                                     <option key={handler.id} value={handler.id}>
                                         {handler.role === "admin" ? "⭐" : "👤"} {handler.name}
                                     </option>
-                                ))}
+                                ))} */}
+                                 {!isLoading && !isError && (
+                                    <>
+
+                                        {(!handlerId || !data?.users?.some((h: any) => h.id === handlerId)) && (
+                                            <option value="">
+                                                Select a handler / All
+                                            </option>
+                                        )}
+
+                                        {data?.users?.map((handler: HandlerProps) => (
+                                            <option key={handler.id} value={handler.id}>
+                                                {handler.role === "admin" ? "⭐" : "👤"} {handler.name}
+                                            </option>
+                                        ))}
+                                    </>
+                                )}
                             </select>
                         </div>
 

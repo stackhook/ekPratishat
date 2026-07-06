@@ -26,6 +26,7 @@ import AddPropertyNoteButton from "./addPropertyNoteButton";
 import NotesCard from "./notesCard";
 import DynamicIcon from "./DynamicIcon";
 import UpdateCoverImage from "./updateCoverImage";
+import ChangePropertyHandler from "./ChangePropertyHandler";
 
 
 export default function AdminPropertyDetailComponent() {
@@ -160,7 +161,6 @@ export default function AdminPropertyDetailComponent() {
 
   const isPending = verifyPending || activePending || featurePending;
 
-  console.log("Property Data:", property);
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden bg-white dark:bg-secondary-900">
 
@@ -282,6 +282,7 @@ export default function AdminPropertyDetailComponent() {
           </button>
           <UpdateCoverImage propertyId={property.id} images={images} coverImageId={property?.coverImage?.id} text="Update Cover Image" />
           <DeletePropertyButton id={property.id} isActive={property.isActive} />
+          <ChangePropertyHandler propertyId={property.id} currentHandler={property.handler}/>
 
         </div>
 
@@ -387,9 +388,15 @@ export default function AdminPropertyDetailComponent() {
               {property.user?.name?.charAt(0) || "?"}
             </div>
             <div className="min-w-0">
-              <span className="block text-[10px] text-secondary-400 font-bold uppercase tracking-wider">Posted Agent</span>
+              <span className="block text-[10px] text-secondary-400 font-bold uppercase tracking-wider">Created By</span>
               <p className="font-bold text-secondary-900 dark:text-secondary-100 truncate text-sm mt-0.5">
                 {property.user?.name || "Anonymous User"}
+              </p>
+            </div>
+            <div className="min-w-0">
+              <span className="block text-[10px] text-secondary-400 font-bold uppercase tracking-wider">Current Handler</span>
+              <p className="font-bold text-secondary-900 dark:text-secondary-100 truncate text-sm mt-0.5">
+                {property.handler?.name || "Anonymous User"}
               </p>
             </div>
           </div>

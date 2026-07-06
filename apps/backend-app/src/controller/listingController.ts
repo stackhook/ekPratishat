@@ -121,7 +121,9 @@ export const addProperty = async (req: Request, res: Response) => {
       lat: normalized.lat ? Number(normalized.lat) : null,
       lng: normalized.lng ? Number(normalized.lng) : null,
 
-      noOfBedRooms: normalized.noOfBedRooms ? Number(normalized.noOfBedRooms) : null,
+      noOfBedRooms: normalized.noOfBedRooms
+        ? Number(normalized.noOfBedRooms)
+        : null,
       noOfRestRooms: normalized.noOfRestRooms
         ? Number(normalized.noOfRestRooms)
         : null,
@@ -130,7 +132,9 @@ export const addProperty = async (req: Request, res: Response) => {
       landArea: normalized.landArea ? Number(normalized.landArea) : null,
       floorArea: normalized.floorArea ? Number(normalized.floorArea) : null,
       roadSize: normalized.roadSize ? Number(normalized.roadSize) : null,
-      propertyAge: normalized.propertyAge ? Number(normalized.propertyAge) : null,
+      propertyAge: normalized.propertyAge
+        ? Number(normalized.propertyAge)
+        : null,
       price: Number(normalized.price),
 
       amenities: normalized.amenities
@@ -589,7 +593,9 @@ export async function updateProperty(req: Request, res: Response) {
       lat: normalized.lat ? Number(normalized.lat) : null,
       lng: normalized.lng ? Number(normalized.lng) : null,
 
-      noOfBedRooms: normalized.noOfBedRooms ? Number(normalized.noOfBedRooms) : null,
+      noOfBedRooms: normalized.noOfBedRooms
+        ? Number(normalized.noOfBedRooms)
+        : null,
       noOfRestRooms: normalized.noOfRestRooms
         ? Number(normalized.noOfRestRooms)
         : null,
@@ -598,9 +604,11 @@ export async function updateProperty(req: Request, res: Response) {
       landArea: normalized.landArea ? Number(normalized.landArea) : null,
       floorArea: normalized.floorArea ? Number(normalized.floorArea) : null,
       roadSize: normalized.roadSize ? Number(normalized.roadSize) : null,
-      propertyAge: normalized.propertyAge ? Number(normalized.propertyAge) : null,
+      propertyAge: normalized.propertyAge
+        ? Number(normalized.propertyAge)
+        : null,
       price: Number(normalized.price),
-     
+
       amenities: normalized.amenities
         ? (JSON.parse(normalized.amenities as string) as string[])
         : null,
@@ -996,3 +1004,92 @@ export async function updateCoverImage(req: Request, res: Response) {
     }
   }
 }
+
+export const changePropertyHandler = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    const {propertyId} = req.params;
+    const handlerId = req.query.handlerId;
+    const { reason } = req.body;
+    if (
+      !propertyId ||
+      Array.isArray(propertyId) ||
+      !handlerId ||
+      Array.isArray(handlerId)
+    ) {
+      throw new AppError(400, "Property ID and Handler ID are required");
+    };
+
+    if(!reason || !reason.trim()) {
+      throw new AppError(400, "Reason for changing handler is required");
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const handler = await tx.user.findUnique({
+        where: { id: handlerId as string},
+      });
+
+      if (!handler || (handler.role !== "staff" && handler.role !== "admin")) {
+        throw new AppError(400, "Invalid handler ID");
+      }
+
+      const existingProperty = await tx.property.findUnique({
+        where: { id: propertyId },
+      });
+
+      if (!existingProperty) {
+        throw new AppError(
+          404,
+          "The property you are trying to update does not exist.",
+        );
+      }
+
+      await tx.property.update({
+        where: { id: propertyId },
+        data: {
+          handlerId: handlerId,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: user.id,
+          actorType: user.role,
+          actorName: user.name,
+          action: "UPDATE",
+          entityType: "Property",
+          entityId: existingProperty.propertyCode.toString(),
+          oldValues: {
+            propertyCode: existingProperty.propertyCode,
+            handlerId: existingProperty.handlerId,
+          },
+          newValues: {
+            propertyCode: existingProperty.propertyCode,
+            handlerId: handlerId,
+          },
+          metadata: { reason: reason?.trim() },
+        },
+      });
+    });
+
+    return res.status(200).json({
+      message: "Property handler updated successfully",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.status).json({
+        message: error.message,
+      });
+    }
+    try {
+      handlePrismaError(error);
+    } catch (dbError) {
+      if (dbError instanceof DatabaseError) {
+        return res
+          .status(dbError.statusCode)
+          .json({ message: dbError.message });
+      }
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+};

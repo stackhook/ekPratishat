@@ -7,6 +7,7 @@ import {
 import {
   addAmenity,
   addProperty,
+  changePropertyHandler,
   checkFavourite,
   createCategory,
   deactivateListing,
@@ -61,6 +62,7 @@ listingRouter.put("/mark-verified",checkAuthentication,requireAdmin,verifyListin
 listingRouter.put("/mark-featured",checkAuthentication,requireAdmin,featureListing);
 listingRouter.put("/update-cover/:id", checkAuthentication,updateCoverImage);
 listingRouter.put("/update-category/:id",checkAuthentication,requireAdmin,uploadUserFiles.single("image"),updateCategory);
+listingRouter.put("/change-handler/:propertyId", checkAuthentication, requireAdmin, changePropertyHandler);
 listingRouter.put("/:id", checkAuthentication, requireAdmin, toggleActivateListing);
 
 listingRouter.get("/my-listings", checkAuthentication, getUserListings);
