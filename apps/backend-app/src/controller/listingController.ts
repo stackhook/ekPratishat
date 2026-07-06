@@ -983,7 +983,7 @@ export async function updateCoverImage(req: Request, res: Response) {
       },
     });
 
-    triggerFrontendUpdate({tag: "properties"});
+    triggerFrontendUpdate({tag: "properties", path: `/properties/${existingProperty.id}`});
 
     return res.status(200).json({
       message: "Cover Image updated Successfully!!!",
