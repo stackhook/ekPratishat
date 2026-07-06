@@ -17,6 +17,7 @@ interface PropertyQueryType {
   c_id?: string;
   isActive?: string;
   q?: string;
+  staffId?:string;
 }
 
 export const useGetCategories = () => {
@@ -93,11 +94,12 @@ export const useGetAllProperties = ({
   type = "",
   isVerified = "",
   q = "",
+  staffId = "",
 }: PropertyQueryType) => {
   return useQuery({
     queryKey: [
       "all-properties",
-      { page, c_id, isActive, isFeatured, type, isVerified, q },
+      { page, c_id, isActive, isFeatured, type, isVerified, q,staffId },
     ],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -109,6 +111,7 @@ export const useGetAllProperties = ({
         ...(isActive !== "" && { isActive: String(isActive) }),
         ...(isVerified !== "" && { isVerified: String(isVerified) }),
         ...(isFeatured !== "" && { isFeatured: String(isFeatured) }),
+        ...(staffId && {staffId})
       });
 
       return authenticatedFetch(

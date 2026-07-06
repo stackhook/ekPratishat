@@ -129,14 +129,13 @@ export default function ChangeHandler({ lead }: { lead: LeadDetailType }) {
                                 ))} */}
                                  {!isLoading && !isError && (
                                     <>
-
-                                        {(!handlerId || !data?.users?.some((h: any) => h.id === handlerId)) && (
+                                        {(!handlerId || !data?.some((h: any) => h.id === handlerId)) && (
                                             <option value="">
                                                 Select a handler / All
                                             </option>
                                         )}
 
-                                        {data?.users?.map((handler: HandlerProps) => (
+                                        {data?.map((handler: HandlerProps) => (
                                             <option key={handler.id} value={handler.id}>
                                                 {handler.role === "admin" ? "⭐" : "👤"} {handler.name}
                                             </option>

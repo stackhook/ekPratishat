@@ -463,6 +463,7 @@ export async function getAllProperties(req: Request, res: Response) {
     const q = String(queries.q || "")
       .toLowerCase()
       .trim();
+    const staffId = String(queries.staffId || "").toLowerCase().trim();
     const c_id = String(queries.c_id || "")
       .toLowerCase()
       .trim();
@@ -475,12 +476,15 @@ export async function getAllProperties(req: Request, res: Response) {
       ? (typeQuery as "rent" | "sale")
       : undefined;
 
+
+    console.log(staffId);
     const where: Prisma.PropertyWhereInput = {
       ...(filterVerified !== undefined && { verified: filterVerified }),
       ...(filterActive !== undefined && { isActive: filterActive }),
       ...(filterFeature !== undefined && { isFeatured: filterFeature }),
       ...(filterType !== undefined && { type: filterType }),
       ...(c_id && { categoryId: c_id }),
+      ...(staffId && { handlerId: staffId }),
       ...(q && {
         OR: [
           { title: { contains: q, mode: "insensitive" } },
