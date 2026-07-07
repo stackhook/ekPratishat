@@ -3,6 +3,7 @@
 import { useGetLeadById } from "@repo/query-hook";
 import AnimateLoader from "@repo/ui/animateLoader";
 import { LeadDetailType } from "@repo/validators";
+import ImageLightbox from "@repo/ui/imageLightbox";
 import { useParams } from "next/navigation"
 import {
     Phone,
@@ -378,12 +379,12 @@ export default function LeadDetailPage() {
                         <div className="bg-white dark:bg-secondary-900 border border-secondary-200 dark:border-secondary-800 rounded-2xl p-5 shadow-sm space-y-3">
                             <span className="text-secondary-400 text-[10px] font-bold uppercase tracking-wider block">Attached Document Asset Preview</span>
                             <div className="relative max-w-md rounded-xl overflow-hidden border border-secondary-200 dark:border-secondary-800 shadow-inner group bg-secondary-50">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
+                                <ImageLightbox
                                     src={`${process.env.NEXT_PUBLIC_BASE_URL}${lead.imageUrl}`}
-                                    alt="Lead profile attachment graphic documentation"
+                                    alt="Lead attached document"
                                     className="w-full h-auto max-h-64 object-cover group-hover:scale-[1.02] transition-transform duration-300"
                                 />
+
                             </div>
                         </div>
                     )}
