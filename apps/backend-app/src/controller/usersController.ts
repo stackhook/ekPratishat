@@ -167,7 +167,7 @@ export async function getTotalValuation(req: Request, res: Response) {
       },
     });
 
-    res.setHeader("Cache-Control", "private, max-age=7200");
+    // res.setHeader("Cache-Control", "private, max-age=7200");
     return res.status(200).json(result);
   } catch (error) {
     try {

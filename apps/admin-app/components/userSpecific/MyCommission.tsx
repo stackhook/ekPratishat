@@ -1,13 +1,13 @@
 "use client";
 
-import { useGetMyTotalPropertyValue } from "@repo/query-hook";
+import { useGetMyTotalPropertyValue, useUser } from "@repo/query-hook";
 import { PropertyPortfolioSummarySkeleton } from "./PropertyPortFolioSkeleton";
 import PropertyPortfolioSummary from "./PorpertyPortFolioSummary";
 
 export default function MyCommission() {
     const { data, isLoading, isError, error } =
         useGetMyTotalPropertyValue();
-    const {data:user, isLoading: userLoading, isError: userError} = useGetMyTotalPropertyValue();
+    const {data:user, isLoading: userLoading, isError: userError} = useUser();
     if (isLoading || userLoading) {
         return <PropertyPortfolioSummarySkeleton />;
     }

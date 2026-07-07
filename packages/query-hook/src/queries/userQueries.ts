@@ -170,7 +170,7 @@ export const useGetMyTotalPropertyValue = () => {
     queryFn: async () => {
       return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/my-total-property-value`,
-        { method: "GET",cache: "force-cache"},
+        { method: "GET"},
       );
     },
     staleTime: 2 * 60 * 60 * 1000,
