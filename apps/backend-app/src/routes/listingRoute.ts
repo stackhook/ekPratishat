@@ -14,6 +14,7 @@ import {
   deleteProperty,
   featureListing,
   fetchUserFavourites,
+  getAllCategories,
   getAllProperties,
 
   getAmenities,
@@ -65,6 +66,7 @@ listingRouter.put("/update-category/:id",checkAuthentication,requireAdmin,upload
 listingRouter.put("/change-handler/:propertyId", checkAuthentication, requireAdmin, changePropertyHandler);
 listingRouter.put("/:id", checkAuthentication, requireAdmin, toggleActivateListing);
 
+listingRouter.get("/categories", getAllCategories);
 listingRouter.get("/my-listings", checkAuthentication, getUserListings);
 listingRouter.get("/my-favourites",checkAuthentication,fetchUserFavourites);
 listingRouter.get("/get-all",checkAuthentication,requireAdminOrStaff,getAllProperties);

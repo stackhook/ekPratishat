@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetAdminStaff, useGetAllProperties, useGetCategories, useUser } from "@repo/query-hook";
+import { useGetAdminStaff, useGetAllCategories, useGetAllProperties, useGetCategories, useUser } from "@repo/query-hook";
 import AnimateLoader from "@repo/ui/animateLoader";
 import { ChevronDown, Eye, Filter, Plus, Search, ShieldCheck, Star, X } from "lucide-react";
 import Link from "next/link";
@@ -10,9 +10,9 @@ import ListingTable from "../../../components/ListingTable";
 import Pagination from "../../../components/Pagination";
 
 interface StaffProps {
-    id:string;
-    name:string;
-    role:string;
+    id: string;
+    name: string;
+    role: string;
 }
 
 export default function PropertiesListPage() {
@@ -47,12 +47,52 @@ export default function PropertiesListPage() {
         setStaffId(sp.get("staffId") || "");
     }, [sp]);
 
-    const { data, isLoading, isError, error } = useGetAllProperties({ page, pageSize: 20, c_id, isActive, isFeatured, type, isVerified, q, staffId });
-    const { data: categories, isLoading: categoriesLoading } = useGetCategories();
     const { data: user, isLoading: userLoading, isError: isUserError, error: userError } = useUser();
-    const {data:allStaff, isLoading: staffLoading, isError: staffError, error: staffErrorMessage} = useGetAdminStaff(true);
 
-    if (isLoading || categoriesLoading || userLoading || staffLoading){
+    const effectiveStaffId = user?.role === "staff" ? user.id : staffId;
+
+    console.log("render", {
+        user,
+        userLoading,
+        effectiveStaffId,
+    });
+
+    const { data, isLoading, isError, error } = useGetAllProperties({ page, pageSize: 20, c_id, isActive, isFeatured, type, isVerified, q, staffId: effectiveStaffId, enabled:!userLoading });
+    const { data: categories, isLoading: categoriesLoading } = useGetAllCategories();
+
+
+    const shouldLoadStaff =
+        !userLoading && user?.role === "admin";
+
+    const { data: allStaff, isLoading: staffLoading, isError: staffError, error: staffErrorMessage } = useGetAdminStaff(shouldLoadStaff);
+
+
+
+    useEffect(() => {
+        if (!user) return;
+
+        if (user.role === "staff") {
+            const params = new URLSearchParams(sp.toString());
+
+            if (params.get("staffId") !== user.id) {
+                params.set("staffId", user.id);
+
+                startTransition(() => {
+                    router.replace(`${pathname}?${params.toString()}`);
+                });
+            }
+        }
+    }, [user, sp, pathname, router]);
+
+    const loading =
+        userLoading ||
+        categoriesLoading ||
+        isLoading ||
+        (user?.role === "admin" && staffLoading);
+
+
+
+    if (loading) {
         return (
             <div className="flex items-center justify-center h-full min-h-[400px]">
                 <AnimateLoader />
@@ -98,15 +138,30 @@ export default function PropertiesListPage() {
         setIsFeatured("");
         setIsActive("");
         setCatId("");
-        setStaffId("");
         setType("");
         setInput("");
-        startTransition(() => router.push(pathname));
+
+        if (user.role === "staff") {
+            setStaffId(user.id);
+
+            const params = new URLSearchParams();
+            params.set("staffId", user.id);
+
+            startTransition(() => {
+                router.push(`${pathname}?${params.toString()}`);
+            });
+        } else {
+            setStaffId("");
+
+            startTransition(() => {
+                router.push(pathname);
+            });
+        }
     };
 
     const listings = data.items;
     const { totalPages, page: currentPage } = data.meta;
- 
+
 
     return (
         <main className="min-h-screen">
@@ -206,23 +261,27 @@ export default function PropertiesListPage() {
                                     className="bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-lg px-3 py-2 text-sm w-full cursor-pointer dark:text-white appearance-none focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all pr-10"
                                 >
                                     <option value="">All Categories</option>
-                                    {categories?.result.map((cat) => (
+                                    {categories?.result.map((cat: any) => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
                             </FilterGroup>
-                            <FilterGroup label="Handler" icon={<Filter size={14} />}>
-                                <select
-                                    value={staffId}
-                                    onChange={(e) => applyFilters({ staffId: e.target.value })}
-                                    className="bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-lg px-3 py-2 text-sm w-full cursor-pointer dark:text-white appearance-none focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all pr-10"
-                                >
-                                    <option value="">All</option>
-                                    {allStaff?.map((staff:StaffProps) => (
-                                        <option key={staff.id} value={staff.id}>{staff.name}</option>
-                                    ))}
-                                </select>
-                            </FilterGroup>
+                            {
+                                user.role === "admin" && (
+                                    <FilterGroup label="Handler" icon={<Filter size={14} />}>
+                                        <select
+                                            value={staffId}
+                                            onChange={(e) => applyFilters({ staffId: e.target.value })}
+                                            className="bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-lg px-3 py-2 text-sm w-full cursor-pointer dark:text-white appearance-none focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all pr-10"
+                                        >
+                                            <option value="">All</option>
+                                            {allStaff?.map((staff: StaffProps) => (
+                                                <option key={staff.id} value={staff.id}>{staff.name}</option>
+                                            ))}
+                                        </select>
+                                    </FilterGroup>
+                                )
+                            }
 
                             {/* Type */}
                             <FilterGroup label="Listing Type" icon={<Filter size={14} />}>

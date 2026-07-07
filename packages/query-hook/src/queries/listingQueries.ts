@@ -18,6 +18,7 @@ interface PropertyQueryType {
   isActive?: string;
   q?: string;
   staffId?:string;
+  enabled?:boolean;
 }
 
 export const useGetCategories = () => {
@@ -85,6 +86,27 @@ export const useGetAmenities = () => {
   });
 };
 
+export const useGetAllCategories = () => {
+  return useQuery({
+    queryKey: ["all-categories"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/categories`,
+        { method: "GET" },
+      );
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to fetch info");
+      }
+
+      return data;
+    },
+    staleTime:5 * 60 * 1000,
+  });
+  
+};
+
 export const useGetAllProperties = ({
   page = 1,
   pageSize = 20,
@@ -95,6 +117,7 @@ export const useGetAllProperties = ({
   isVerified = "",
   q = "",
   staffId = "",
+  enabled = true,
 }: PropertyQueryType) => {
   return useQuery({
     queryKey: [
@@ -121,5 +144,6 @@ export const useGetAllProperties = ({
     },
     staleTime: 2 * 60 * 1000,
     retry: 1,
+    enabled: enabled,
   });
 };
