@@ -73,7 +73,6 @@ export default function PropertiesListPage() {
 
     const applyFilters = (updates: Record<string, string>) => {
         const params = new URLSearchParams(sp.toString());
-        console.log("Updates:", updates);
         // Apply the updates passed (q, c_id, or type)
         Object.entries(updates).forEach(([key, value]) => {
             // if (value) params.set(key, value);
