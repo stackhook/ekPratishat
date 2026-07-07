@@ -1,4 +1,9 @@
-import { Prisma, prisma } from "@repo/database";
+import {
+  DatabaseError,
+  handlePrismaError,
+  Prisma,
+  prisma,
+} from "@repo/database";
 import { AppError } from "@repo/functions";
 import { Request, Response } from "express";
 
@@ -41,19 +46,22 @@ export async function getUsers(req: Request, res: Response) {
     const pageSize = Math.min(100, Math.max(1, Number(queries.pageSize || 20)));
 
     const validRoles = ["client", "staff", "partner"];
-   const roleQuery = String(queries.role || "").toLowerCase().trim();
-    const filterRole = validRoles.includes(roleQuery) 
-      ? (roleQuery as "client" | "staff" | "partner") 
+    const roleQuery = String(queries.role || "")
+      .toLowerCase()
+      .trim();
+    const filterRole = validRoles.includes(roleQuery)
+      ? (roleQuery as "client" | "staff" | "partner")
       : undefined;
 
     const isVerifiedQuery = queries.isVerified;
-    const filterVerified = isVerifiedQuery === "true" 
-      ? true 
-      : isVerifiedQuery === "false" 
-        ? false 
-        : undefined;
-    
-     const isActiveQuery = queries.isActive;
+    const filterVerified =
+      isVerifiedQuery === "true"
+        ? true
+        : isVerifiedQuery === "false"
+          ? false
+          : undefined;
+
+    const isActiveQuery = queries.isActive;
     const filterActive =
       isActiveQuery === "true"
         ? true
@@ -61,11 +69,13 @@ export async function getUsers(req: Request, res: Response) {
           ? false
           : undefined;
 
-    const q = String(queries.q || "").toLowerCase().trim();
+    const q = String(queries.q || "")
+      .toLowerCase()
+      .trim();
 
     const where: Prisma.UserWhereInput = {
       role: {
-        not: "admin"
+        not: "admin",
       },
       ...(filterVerified !== undefined && { isVerified: filterVerified }),
       ...(filterActive !== undefined && { isActive: filterActive }),
@@ -81,7 +91,7 @@ export async function getUsers(req: Request, res: Response) {
           name: true,
           contact: true,
           isVerified: true,
-          role:true,
+          role: true,
           createdAt: true,
           secondContact: true,
           createdBy: {
@@ -91,55 +101,84 @@ export async function getUsers(req: Request, res: Response) {
             },
           },
         },
-        skip: (page -1 ) * pageSize,
+        skip: (page - 1) * pageSize,
         take: pageSize,
         orderBy: {
           createdAt: "desc",
         },
       }),
-      prisma.user.count({where})
+      prisma.user.count({ where }),
     ]);
 
     return res.status(200).json({
-        items,
-        meta: {
-            total,
-            page,
-            pageSize,
-            totalPages: Math.max(1, Math.ceil(total / pageSize)),
-        }
-    })
+      items,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.max(1, Math.ceil(total / pageSize)),
+      },
+    });
   } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message:"Internal Server Error!!!"
-        })
+    console.error(error);
+    res.status(500).json({
+      message: "Internal Server Error!!!",
+    });
   }
 }
-
 
 export async function getAdminOrStaff(req: Request, res: Response) {
   const user = req.user;
   try {
     const result = await prisma.user.findMany({
       where: {
-        OR: [
-          { role: "admin" },
-          { role: "staff" },
-        ],
+        OR: [{ role: "admin" }, { role: "staff" }],
       },
       select: {
         id: true,
         name: true,
-        role:true
+        role: true,
       },
     });
 
     return res.status(200).json(result);
-
   } catch (error) {
     return res.status(500).json({
       message: "Failed to fetch users",
     });
+  }
+}
+
+export async function getTotalValuation(req: Request, res: Response) {
+  try {
+    const user = req.user;
+    const result = await prisma.property.groupBy({
+      by: ["type"],
+      where: {
+        handlerId: user.id,
+        isSold: false, // if you don't want sold properties
+        isActive: true,
+      },
+      _sum: {
+        price: true,
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    res.setHeader("Cache-Control", "private, max-age=7200");
+    return res.status(200).json(result);
+  } catch (error) {
+    try {
+      handlePrismaError(error);
+    } catch (dbError) {
+      if (dbError instanceof DatabaseError) {
+        return res
+          .status(dbError.statusCode)
+          .json({ message: dbError.message });
+      }
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
   }
 }

@@ -194,6 +194,7 @@ model Property {
   @@index([type])
   @@index([userId, isActive])
   @@index([userId, isActive, verified])
+  @@index([handlerId])
 }
 
 model Favourite {

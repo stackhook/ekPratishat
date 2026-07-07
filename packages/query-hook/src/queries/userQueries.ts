@@ -163,3 +163,20 @@ export const useGetStaff = (open: boolean) => {
     enabled: open,
   });
 };
+
+export const useGetMyTotalPropertyValue = () => {
+  return useQuery({
+    queryKey: ["my-total-property-value"],
+    queryFn: async () => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/my-total-property-value`,
+        { method: "GET",cache: "force-cache"},
+      );
+    },
+    staleTime: 2 * 60 * 60 * 1000,
+    refetchInterval: 2 * 60 * 60 * 1000,
+    retry: 1,
+    retryDelay: 2000,
+    refetchOnWindowFocus: true,
+  }); 
+}
