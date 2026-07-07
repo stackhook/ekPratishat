@@ -77,7 +77,7 @@ export default async function RelatedProperties({
     }));
 
     return (
-        <section className="max-w-7xl mx-auto px-4 py-16 sm:py-24 border-t border-secondary-100 dark:border-secondary-900">
+        <section className="max-w-7xl mx-auto px-4 pt-16 sm:pt-24 border-t border-secondary-100 dark:border-secondary-900">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div className="space-y-2">
                     <p className="text-gold font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs">

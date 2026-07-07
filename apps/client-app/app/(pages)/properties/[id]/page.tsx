@@ -173,11 +173,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     };
 
     return (
-        <>
-            <PropertyDetailClient property={serializedProperty} />
-            <PropertyInfo property={serializedProperty} />
-            <RelatedProperties categoryId={result.category.id} categoryName={result.category.name} currentPropertyId={result.id} type={result.type} />
-        </>
+        <div className="pb-16 sm:pb-24">
+        <PropertyDetailClient property={serializedProperty} />
+        <PropertyInfo property={serializedProperty} />
+        <RelatedProperties categoryId={result.category.id} categoryName={result.category.name} currentPropertyId={result.id} type={result.type} />
+    </div>
     )
 
 }
