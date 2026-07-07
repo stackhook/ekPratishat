@@ -61,7 +61,7 @@ export default function PropertyPortfolioSummary({
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 text-indigo-300 text-xs font-bold tracking-widest uppercase">
                             <Wallet className="h-4 w-4 text-emerald-400" />
-                            Your Target Commission Take-Home
+                            Your Potential Commission Take-Home
                         </div>
                         <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-sm select-all">
                             {formatCurrency(totalCommission)}
