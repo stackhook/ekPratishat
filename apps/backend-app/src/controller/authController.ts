@@ -262,7 +262,7 @@ export const myInfo = async (req: Request, res: Response) => {
     const payload = verifyToken(token);
 
     const checkUser = await prisma.user.findUnique({
-      where: { id: payload.userId },
+      where: { id: payload.userId, isActive: true },
       select: {
         id:true,
         name:true,
