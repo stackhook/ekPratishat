@@ -10,13 +10,15 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import NotesCard from "@repo/components/notesCard";
+import { getRoomLabels } from "../../utils/roomLabels";
 
 export default function PropertyInfo({property}:PropertyDetailClientProps){
+    const roomLabels = getRoomLabels(property.category?.name);
     const specifications = [
     { label: "Property Type", value: property.type || "Not specified", icon: HomeIcon },
     { label: "Category", value: property.category?.name || "Not specified", icon: BuildingOfficeIcon },
-    { label: "Bedrooms", value: property.noOfBedRooms, icon: HomeIcon },
-    { label: "Bathrooms", value: property.noOfRestRooms, icon: HomeIcon },
+    { label: roomLabels.bedrooms, value: property.noOfBedRooms, icon: HomeIcon },
+    { label: roomLabels.restrooms, value: property.noOfRestRooms, icon: HomeIcon },
     { label: "Land Area (sq. MTR)", value: property.landArea, icon: ArrowsPointingOutIcon },
     { label: "Floor Area (sq. ft.)", value: property.floorArea, icon: ArrowsPointingOutIcon },
     { label: "Number of Floors", value: property.noOfFloors, icon: BuildingOfficeIcon },
