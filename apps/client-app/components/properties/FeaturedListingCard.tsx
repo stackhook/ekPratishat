@@ -3,17 +3,18 @@
 import Image from "next/image";
 import { Bed, Bath, Maximize, MapPin, Crown, Sparkles } from "lucide-react";
 import { PropertyListing } from "@repo/validators";
+import { getCardArea } from "../../utils/cardAreaDisplay";
 
 
 export default function PremiumListingCard({ listing }: { listing: PropertyListing }) {
-
   const formattedPrice = new Intl.NumberFormat('en-IN').format(Number(listing.price));
+  const area = getCardArea(listing);
 
   // Premium features based on actual data
   const premiumFeatures = [
     listing.noOfBedRooms ? `${listing.noOfBedRooms} Beds` : null,
     listing.noOfRestRooms ? `${listing.noOfRestRooms} Baths` : null,
-    listing.landArea ? `${listing.landArea} sq.ft` : null,
+    area ?`${area.value} ${area.unit}`:null,
     "Verified Property"
   ].filter(Boolean);
 
@@ -128,12 +129,12 @@ export default function PremiumListingCard({ listing }: { listing: PropertyListi
                 </div>
               )}
 
-              {listing.landArea && (
+              {area && (
                 <div className="flex items-center gap-1.5">
                   <div className="rounded bg-[rgba(154,106,0,0.07)] p-1 dark:bg-[rgba(229,184,62,0.08)]">
                     <Maximize size={14} className="text-[var(--ek-gold-text)] dark:text-[var(--ek-dark-gold)]" />
                   </div>
-                  <span className="text-xs font-semibold text-[var(--ek-text-secondary)] dark:text-[var(--ek-dark-muted)]">{listing.landArea}</span>
+                  <span className="text-xs font-semibold text-[var(--ek-text-secondary)] dark:text-[var(--ek-dark-muted)]">{area.value} {area.unit}</span>
                 </div>
               )}
             </div>
