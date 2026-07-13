@@ -1,10 +1,12 @@
 import Image from "next/image";
 import { Bed, Bath, Maximize, MapPin, Crown } from "lucide-react";
 import { PropertyListing } from "@repo/validators";
+import { getCardArea } from "../../utils/cardAreaDisplay";
 
 export default function ListingCard({ listing }: {listing:PropertyListing}) {
   // Use the Inland formatting logic for these large numbers
   const formattedPrice = new Intl.NumberFormat('en-IN').format(Number(listing.price));
+  const area = getCardArea(listing);
 
   return (
     <div className="group relative w-full overflow-hidden rounded-2xl border bg-[var(--ek-bg-card)] shadow-[var(--ek-shadow-card)] antialiased transition duration-300 transform-gpu hover:-translate-y-0.5 hover:border-[var(--ek-border-strong)] hover:shadow-[0_22px_54px_rgba(15,23,42,0.13)] dark:border-[var(--ek-dark-border)] dark:bg-[var(--ek-dark-surface)] dark:shadow-[var(--ek-dark-shadow-card)] dark:hover:border-[var(--ek-dark-border-strong)]">
@@ -69,10 +71,10 @@ export default function ListingCard({ listing }: {listing:PropertyListing}) {
                 <span className="text-sm font-medium">{listing.noOfRestRooms}</span>
               </div>
             )}
-            {listing.landArea && (
+            {area && (
               <div className="flex items-center gap-1.5">
                 <Maximize size={16} className="text-[var(--ek-gold-text)] dark:text-[var(--ek-dark-gold)]" />
-                <span className="text-sm font-medium">{listing.landArea}</span>
+                <span className="text-sm font-medium">{area.value} {area.unit}</span>
               </div>
             )}
           </div>
