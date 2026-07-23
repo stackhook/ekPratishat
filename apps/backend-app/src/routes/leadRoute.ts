@@ -6,6 +6,7 @@ import {
   getLeads,
   getTodayFollowUpLead,
   getUserLeads,
+  pokeLead,
   updateFollowUpTime,
   updateLeadBasicInformation,
   updateLeadStatus,
@@ -26,6 +27,8 @@ leadRouter.post(
   uploadUserFiles.single("image"),
   addLead,
 );
+
+leadRouter.post("/poke/:id", checkAuthentication, requireAdmin, pokeLead);
 
 leadRouter.get("/", checkAuthentication, requireAdminOrStaff, getLeads);
 leadRouter.get("/user-leads", checkAuthentication, getUserLeads);

@@ -108,3 +108,20 @@ export const useChangeHander = (id:string) => {
     },
   })
 }
+
+
+export const usePokeLead = (id:string) => {
+  return useMutation({
+    mutationFn: async () => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/lead/poke/${id}`,
+        {
+          method: "POST",
+        },
+      );
+    },
+    onError: (error) => {
+      toast.error(error.message || "Operation Failed!!!");
+    },
+  })
+}

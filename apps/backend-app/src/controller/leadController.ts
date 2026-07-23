@@ -1,4 +1,4 @@
-import { Prisma, prisma } from "@repo/database";
+import { DatabaseError, handlePrismaError, Prisma, prisma } from "@repo/database";
 import { AppError, createLead } from "@repo/functions";
 import { UpdateLeadSchema } from "@repo/validators";
 import { Request, Response } from "express";
@@ -827,5 +827,76 @@ export async function getTodayFollowUpLead(req: Request, res: Response) {
     return res.status(500).json({
       message: "Server couldn't process your request. Try again later"
     });
+  }
+}
+
+
+//poke handler
+
+export async function pokeLead(req: Request, res: Response) {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+
+    if (!id || Array.isArray(id)) {
+      throw new AppError(400, "Invalid Lead Id");
+    }
+
+    const lead = await prisma.lead.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        managedById: true,
+        status: true,
+      },
+    });
+
+    if (!lead) {
+      return res.status(404).json({ message: "Lead record not found." });
+    }
+
+    if(lead.managedById === user.id){
+      return res.status(400).json({
+        message: "You cannot poke yourself for the lead you are managing.",
+      });
+    }
+
+    await prisma.notificationEvent.create({
+      data: {
+        senderId: user.id,
+        title: `Lead Poked by ${user.name}`,
+        body: `${user.name} poked you for lead with status: ${lead.status}`,
+        link: `/admin/leads/${lead.id}`,
+        recipients: {
+          create: [
+            {
+              recipientId: lead.managedById!,
+            },
+          ],
+        },
+      },
+    });
+
+    return res.status(200).json({
+      ok: true,
+      message: "Lead poked successfully.",
+    });
+
+  } catch (error) {
+    if (error instanceof AppError) {
+          return res.status(error.status).json({
+            message: error.message,
+          });
+        }
+        try {
+          handlePrismaError(error);
+        } catch (dbError) {
+          if (dbError instanceof DatabaseError) {
+            return res
+              .status(dbError.statusCode)
+              .json({ message: dbError.message });
+          }
+          return res.status(500).json({ message: "Internal Server Error" });
+        }
   }
 }

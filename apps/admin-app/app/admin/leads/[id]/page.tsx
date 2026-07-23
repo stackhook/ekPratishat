@@ -30,6 +30,7 @@ import LeadStatusUpdate from "../../../../components/lead/LeadStatusUpdate";
 import BasicInfoUpdate from "../../../../components/lead/BasicInfoUpdate";
 import ChangeHandler from "../../../../components/lead/ChangeHandler";
 import { useEffect, useState } from "react";
+import PokeButton from "../../../../components/lead/PokeButton";
 
 export default function LeadDetailPage() {
     const params = useParams();
@@ -114,6 +115,7 @@ export default function LeadDetailPage() {
                         <span>Change Handler</span>
                     </button> */}
                     <ChangeHandler lead={lead} />
+                    <PokeButton lead={lead} />
 
                     <div className="h-6 w-[1px] bg-secondary-200 dark:bg-secondary-800 hidden sm:block mx-1" />
 
