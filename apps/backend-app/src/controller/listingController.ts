@@ -494,8 +494,8 @@ export async function getAllProperties(req: Request, res: Response) {
       ? (typeQuery as "rent" | "sale")
       : undefined;
 
+    const numQ = q && !isNaN(Number(q)) ? parseInt(q, 10) : null;
 
-    console.log(staffId);
     const where: Prisma.PropertyWhereInput = {
       ...(filterVerified !== undefined && { verified: filterVerified }),
       ...(filterActive !== undefined && { isActive: filterActive }),
@@ -508,6 +508,7 @@ export async function getAllProperties(req: Request, res: Response) {
           { title: { contains: q, mode: "insensitive" } },
           { description: { contains: q, mode: "insensitive" } },
           { tole: { contains: q, mode: "insensitive" } },
+          ...(numQ !== null ? [{ propertyCode: { equals: numQ } }] : []),
           {
             location: {
               municipality: {
@@ -537,6 +538,7 @@ export async function getAllProperties(req: Request, res: Response) {
           type: true,
           verified: true,
           isFeatured: true,
+          propertyCode: true,
           tole: true,
           createdAt: true,
           location: {
