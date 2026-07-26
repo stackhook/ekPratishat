@@ -959,6 +959,7 @@ export const updateCompulsoryParameter = async (
           dealType,
           clientType,
           categoryId,
+          updatedById:user.id
         },
       });
       if (user.role === "staff") {
