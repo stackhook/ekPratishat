@@ -31,6 +31,7 @@ import BasicInfoUpdate from "../../../../components/lead/BasicInfoUpdate";
 import ChangeHandler from "../../../../components/lead/ChangeHandler";
 import { useEffect, useState } from "react";
 import PokeButton from "../../../../components/lead/PokeButton";
+import UpdateCompulsoryParameter from "../../../../components/lead/updateCompulsoryParameter";
 
 export default function LeadDetailPage() {
     const params = useParams();
@@ -40,10 +41,10 @@ export default function LeadDetailPage() {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentTime(new Date());
-        },30000);
+        }, 30000);
 
         return () => clearInterval(interval);
-    },[])
+    }, [])
 
     if (isLoading) {
         return (
@@ -136,7 +137,8 @@ export default function LeadDetailPage() {
                 <div className="lg:col-span-1 bg-white dark:bg-secondary-900 border border-secondary-200 dark:border-secondary-800 rounded-2xl overflow-hidden shadow-sm">
                     <div className="p-4 bg-secondary-50/50 dark:bg-secondary-800/40 border-b border-secondary-100 dark:border-secondary-800 flex justify-between items-center">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-secondary-500">Compulsory Parameters</h2>
-                        <button><Edit className="w-4 h-4" /></button>
+                        {/* <button><Edit className="w-4 h-4" /></button> */}
+                        <UpdateCompulsoryParameter lead={lead} />
                     </div>
                     <div className="p-5 space-y-4">
 
@@ -165,12 +167,23 @@ export default function LeadDetailPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-secondary-400 block">Source Funnel</span>
-                            <div className="p-2.5 rounded-xl bg-secondary-50 dark:bg-secondary-800/50 text-xs font-semibold text-secondary-700 dark:text-secondary-300">
-                                {lead.source}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-secondary-400 block">Source Funnel</span>
+                                <div className="p-2.5 rounded-xl bg-secondary-50 dark:bg-secondary-800/50 text-xs font-semibold text-secondary-700 dark:text-secondary-300">
+                                    {lead.source}
+                                </div>
                             </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-secondary-400 block">Category</span>
+                                <div className="p-2.5 rounded-xl bg-secondary-50 dark:bg-secondary-800/50 text-xs font-semibold text-secondary-700 dark:text-secondary-300">
+                                    {lead.category?.name ?? "-"}
+                                </div>
+                            </div>
+
                         </div>
+
+
 
                         <div className="space-y-1 pt-2 border-t border-secondary-100 dark:border-secondary-800/60">
                             <span className="text-[10px] uppercase font-bold tracking-wider text-secondary-400 block">Current Pipeline Stage</span>

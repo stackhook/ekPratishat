@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetLeads } from "@repo/query-hook";
+import { useGetCategories, useGetLeads } from "@repo/query-hook";
 import AnimateLoader from "@repo/ui/animateLoader";
 import { ChevronDown, Filter, Plus, Search, X } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +21,8 @@ export default function LeadsPage() {
   const [status, setStatus] = useState(sp.get("status") || "");
   const [dealType, setDealType] = useState(sp.get("dealType") || "");
   const [clientType, setClientType] = useState(sp.get("clientType") || "");
+  const [c_id, setCatId] = useState(sp.get("c_id") || "");
+
 
   const [isPending, startTransition] = useTransition();
 
@@ -30,9 +32,11 @@ export default function LeadsPage() {
     setStatus(sp.get("status") || "");
     setDealType(sp.get("dealType") || "");
     setClientType(sp.get("clientType") || "");
+    setCatId(sp.get("c_id") || "");
   }, [sp]);
 
-  const { data, isLoading, isError, error } = useGetLeads({page,limit:10,status,dealType,clientType,q});
+  const { data, isLoading, isError, error } = useGetLeads({ page, limit: 10, status, dealType, clientType, q, c_id });
+  const { data: categories, isLoading: categoryLoading, isError: ifCategoryError, error: categoryError } = useGetCategories();
 
   const applyFilters = (updates: Record<string, string>) => {
     const params = new URLSearchParams(sp.toString());
@@ -60,10 +64,12 @@ export default function LeadsPage() {
     setQ("");
     setInput("");
     setStatus("");
+    setCatId("");
+    setClientType("")
     startTransition(() => router.push(pathname));
   };
 
-  if (isLoading) {
+  if (isLoading || categoryLoading) {
     return (
       <div className="flex items-center justify-center h-full min-h-[400px]">
         <AnimateLoader />
@@ -71,11 +77,11 @@ export default function LeadsPage() {
     );
   }
 
-  if (isError) {
-    return <div className="min-h-screen flex items-center justify-center text-red-500">{error.message}</div>
+  if (isError || ifCategoryError) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error?.message || categoryError?.message || "Try Again Later"}</div>
   }
- 
-  const {totalPages,page:currentPage} = data.meta;
+
+  const { totalPages, page: currentPage } = data.meta;
 
   return (
     <main className="min-h-screen">
@@ -138,7 +144,7 @@ export default function LeadsPage() {
                   {isPending ? "Searching..." : "Search Leads"}
                 </button>
 
-                {(q || status) && (
+                {(q || dealType || c_id || status || clientType) && (
                   <button
                     onClick={resetAll}
                     className="p-4 bg-red-50 dark:bg-red-900/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
@@ -163,6 +169,19 @@ export default function LeadsPage() {
                   <option value="">All Client Segments</option>
                   <option value="BUYER">Buyer</option>
                   <option value="SELLER">Seller</option>
+                </select>
+              </FilterGroup>
+
+              <FilterGroup label="Category" icon={<Filter size={14} />}>
+                <select
+                  value={c_id}
+                  onChange={(e) => applyFilters({ c_id: e.target.value })}
+                  className="bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-lg px-3 py-2 text-sm w-full cursor-pointer dark:text-white appearance-none focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all pr-10"
+                >
+                  <option value="">All Categories</option>
+                  {categories?.result.map((cat: any) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
                 </select>
               </FilterGroup>
 
@@ -203,8 +222,8 @@ export default function LeadsPage() {
           </div>
         </div>
       </div>
-      <LeadTable leads={data.data}/>
-      <Pagination totalPages={totalPages} currentPage={currentPage}/>
+      <LeadTable leads={data.data} />
+      <Pagination totalPages={totalPages} currentPage={currentPage} />
     </main>
   );
 }

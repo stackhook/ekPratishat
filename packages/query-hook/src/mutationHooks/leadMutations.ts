@@ -15,6 +15,14 @@ interface UpdateLeadBasicInfoProps{
   notes?:Record<string,any>|null|any;
 }
 
+interface CompulsoryParameterProps {
+  contact:string;
+  dealType:string;
+  clientType:string;
+  source:string;
+  categoryId:string;
+}
+
 export const useCreateLead = () => {
   return useMutation({
     mutationFn: async ({ formData }: { formData: FormData }) => {
@@ -117,6 +125,26 @@ export const usePokeLead = (id:string) => {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/lead/poke/${id}`,
         {
           method: "POST",
+        },
+      );
+    },
+    onError: (error) => {
+      toast.error(error.message || "Operation Failed!!!");
+    },
+  })
+}
+
+export const useUpdateCompulsoryParameter = (id:string) => {
+  return useMutation({
+    mutationFn: async (payload : CompulsoryParameterProps) => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/lead/update-compulsory-parameter/${id}`,
+        {
+          method: "PUT",
+           headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
       );
     },

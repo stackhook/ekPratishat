@@ -7,6 +7,7 @@ import {
   getTodayFollowUpLead,
   getUserLeads,
   pokeLead,
+  updateCompulsoryParameter,
   updateFollowUpTime,
   updateLeadBasicInformation,
   updateLeadStatus,
@@ -59,5 +60,11 @@ leadRouter.put(
   requireAdminOrStaff,
   changeHandler,
 );
+leadRouter.put(
+  "/update-compulsory-parameter/:id",
+  checkAuthentication,
+  requireAdminOrStaff,
+  updateCompulsoryParameter
+)
 
 export default leadRouter;

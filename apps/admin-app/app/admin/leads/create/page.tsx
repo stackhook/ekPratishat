@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Phone, User as UserIcon, Mail, Link, MapPin, Upload, X, Landmark, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@repo/ui/button";
-import { useCreateLead } from "@repo/query-hook";
+import { useCreateLead, useGetCategories } from "@repo/query-hook";
 
 // Explicitly mapping your backend schema Enums for frontend typing
 enum ClientType {
@@ -30,6 +30,7 @@ interface KeyValueRow {
 export default function CreateLeadForm() {
     const queryClient = useQueryClient();
     const { mutate, isPending } = useCreateLead();
+    const { data: categories, isLoading, isError, error } = useGetCategories();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,6 +38,7 @@ export default function CreateLeadForm() {
     const [contact, setContact] = useState("");
     const [clientType, setClientType] = useState<ClientType>(ClientType.BUYER);
     const [dealType, setDealType] = useState<DealType>(DealType.buy);
+    const [categoryId,setCategoryId] = useState("");
 
     // Optional Field States
     const [name, setName] = useState("");
@@ -95,7 +97,7 @@ export default function CreateLeadForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!contact.trim()) {
             toast.error("Contact information is strictly mandatory.");
             return;
@@ -128,12 +130,13 @@ export default function CreateLeadForm() {
             return;
         }
 
-        console.log(finalNoteObject);
+        
         // 2. Wrap payload inside FormData to support Multer engine processing
         const formData = new FormData();
         formData.append("contact", contact.trim());
         formData.append("clientType", clientType);
         formData.append("dealType", dealType);
+        formData.append("categoryId",categoryId);
 
         if (name.trim()) formData.append("name", name.trim());
         if (email.trim()) formData.append("email", email.trim());
@@ -142,7 +145,7 @@ export default function CreateLeadForm() {
         if (propertyId.trim()) formData.append("propertyId", propertyId.trim());
         if (imageFile) formData.append("image", imageFile); // Key matches backend multer parameter setup
 
-        if(Object.keys(finalNoteObject).length > 0) {
+        if (Object.keys(finalNoteObject).length > 0) {
             formData.append("notes", JSON.stringify(finalNoteObject));
         }
 
@@ -150,10 +153,10 @@ export default function CreateLeadForm() {
             onSuccess: (data) => {
                 toast.success(data.message || "New acquisition pipeline lead recorded successfully!");
                 queryClient.invalidateQueries({
-                    queryKey: ["leads"] 
+                    queryKey: ["leads"]
                 });
                 queryClient.invalidateQueries({
-                    queryKey:["user-leads"]
+                    queryKey: ["user-leads"]
                 })
                 // Reset form controls
                 setContact("");
@@ -162,6 +165,7 @@ export default function CreateLeadForm() {
                 setSource("");
                 setCoordinates("");
                 setPropertyId("");
+                setCategoryId("")
                 setRows([{ id: "1", key: "", value: "" }]);
                 handleRemoveImage();
             }
@@ -256,6 +260,34 @@ export default function CreateLeadForm() {
                                     <option value={DealType.sell}>Sell</option>
                                     <option value={DealType.rent}>Rent</option>
                                 </>
+                            )}
+                        </select>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                    <div className="col-span-1">
+                        <label className="text-xs font-semibold text-secondary-700 dark:text-secondary-300 block mb-1.5">
+                            Category <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            name="categoryId"
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                            disabled={isPending || isLoading}
+                            className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-xl bg-white dark:bg-secondary-800 focus:outline-none focus:ring-1 focus:ring-primary-500 text-sm"
+                            required
+                        >
+                            <option value="" hidden disabled>
+                                Select Category
+                            </option>
+                            {isLoading ? (
+                                <option disabled>Loading categories...</option>
+                            ) : (
+                                categories?.result.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </option>
+                                ))
                             )}
                         </select>
                     </div>

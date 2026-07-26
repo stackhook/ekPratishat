@@ -2,16 +2,16 @@
 
 import { Fragment, useState } from "react";
 import Link from "next/link";
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  Eye, 
-  Phone, 
-  Tag, 
-  User, 
-  Mail, 
-  MapPin, 
-  Bookmark, 
+import {
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  Phone,
+  Tag,
+  User,
+  Mail,
+  MapPin,
+  Bookmark,
   Calendar,
   FileText
 } from "lucide-react";
@@ -45,11 +45,11 @@ export default function LeadTable({ leads }: LeadTableProps) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-secondary-50 dark:bg-secondary-800/50 border-b border-secondary-200 dark:border-secondary-800 text-xs font-bold uppercase tracking-wider text-secondary-500">
-              <th className="py-3.5 px-4 w-10"></th>
+              <th className="py-3.5 px-4 w-10">Code</th>
               <th className="py-3.5 px-4">Contact info</th>
               <th className="py-3.5 px-4 text-center">Deal Type</th>
               <th className="py-3.5 px-4 text-center">Client Type</th>
-              <th className="py-3.5 px-4">Source channel</th>
+              <th className="py-3.5 px-4">Category</th>
               <th className="py-3.5 px-4">Status</th>
               <th className="py-3.5 px-4 text-right">Actions</th>
             </tr>
@@ -62,11 +62,21 @@ export default function LeadTable({ leads }: LeadTableProps) {
                   {/* Master row for mandatory configurations */}
                   <tr key={lead.id} className="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/20 transition-colors">
                     <td className="py-4 px-4">
-                      <button 
+                      <button
                         onClick={() => toggleRow(lead.id)}
                         className="p-1 hover:bg-secondary-100 dark:hover:bg-secondary-800 rounded-lg text-secondary-400 transition-colors"
                       >
-                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        {isExpanded ? (
+                          <div className="flex gap-2">
+                            <span>{lead.leadCode}</span>
+                            <ChevronUp className="w-4 h-4" />
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                          <span>{lead.leadCode}</span>
+                          <ChevronDown className="w-4 h-4" />
+                          </div>
+                        )}
                       </button>
                     </td>
                     <td className="py-4 px-4 font-semibold text-secondary-900 dark:text-secondary-100">
@@ -81,16 +91,15 @@ export default function LeadTable({ leads }: LeadTableProps) {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-center">
-                      <span className={`px-2 py-1 text-xs font-bold rounded-md border tracking-wide ${
-                        lead.clientType === "SELLER" 
-                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400" 
+                      <span className={`px-2 py-1 text-xs font-bold rounded-md border tracking-wide ${lead.clientType === "SELLER"
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400"
                           : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400"
-                      }`}>
+                        }`}>
                         {lead.clientType}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-secondary-600 dark:text-secondary-400 font-medium">
-                      {lead.source}
+                      {lead.category?.name ?? ""}
                     </td>
                     <td className="py-4 px-4">
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-secondary-100 text-secondary-700 dark:bg-secondary-800 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-700">
@@ -98,7 +107,7 @@ export default function LeadTable({ leads }: LeadTableProps) {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <Link 
+                      <Link
                         href={`/admin/leads/${lead.id}`}
                         className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-medium transition-colors shadow-sm"
                       >
@@ -140,7 +149,7 @@ export default function LeadTable({ leads }: LeadTableProps) {
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded-md bg-secondary-100 text-secondary-700 dark:bg-secondary-800 text-xs font-bold">
-                    {lead.status}
+                    Code-{lead.leadCode}
                   </span>
                 </div>
 
@@ -248,7 +257,7 @@ function OptionalDetailsPanel({ lead }: { lead: Lead }) {
 
         {lead.managedBy && (
           <div className="space-y-1">
-            <span className="text-secondary-400 block font-medium">Account Owner (Agent)</span>
+            <span className="text-secondary-400 block font-medium">Lead Handler</span>
             <div className="flex items-center gap-2 font-medium text-secondary-800 dark:text-secondary-200">
               <div className="w-4 h-4 rounded-full bg-secondary-200 dark:bg-secondary-700 flex items-center justify-center text-[9px] uppercase font-bold">
                 {lead.managedBy.name.charAt(0)}
@@ -277,8 +286,8 @@ function OptionalDetailsPanel({ lead }: { lead: Lead }) {
             {Object.entries(lead.notes).map(([key, value]) => {
               if (value === null || value === undefined || value === "") return null;
               return (
-                <span 
-                  key={key} 
+                <span
+                  key={key}
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-secondary-800 border border-secondary-200 dark:border-secondary-700 text-secondary-700 dark:text-secondary-300 font-medium"
                 >
                   <Tag className="w-2.5 h-2.5 text-secondary-400" />
@@ -297,9 +306,9 @@ function OptionalDetailsPanel({ lead }: { lead: Lead }) {
           <span className="text-secondary-400 text-[10px] uppercase font-bold tracking-wider block mb-1.5">Attached Documentation Graphic</span>
           <div className="w-24 h-16 rounded-xl overflow-hidden border border-secondary-200 dark:border-secondary-800 relative shadow-inner bg-secondary-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={lead.imageUrl} 
-              alt="Lead attachments preview" 
+            <img
+              src={lead.imageUrl}
+              alt="Lead attachments preview"
               className="w-full h-full object-cover"
             />
           </div>

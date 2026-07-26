@@ -58,6 +58,7 @@ export async function createLead({
           managedById: body.managedById,
           notes: body.notes ? JSON.parse(body.notes) : null,
           dealType: body.dealType,
+          categoryId:body.categoryId
         },
       });
 

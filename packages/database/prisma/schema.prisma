@@ -131,6 +131,7 @@ model Category {
   name                     String
   imageUrl                 String
   properties               Property[]
+  leads                    Lead[]
   isLandAreaNeeded         Boolean
   isNoOfFloorsNeeded       Boolean
   isNoOfRoomsNeeded        Boolean
@@ -317,6 +318,8 @@ model Lead {
   dealType    DealType
   coordinates String?
   managedById String?
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
   managedBy   User?      @relation("LeadsManagedBy", fields: [managedById], references: [id])
   notes       Json?
   followUpAt  DateTime?

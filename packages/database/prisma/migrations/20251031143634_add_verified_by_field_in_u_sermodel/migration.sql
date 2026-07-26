@@ -1,4 +1,4 @@
--- AlterTable
+c-- AlterTable
 ALTER TABLE "public"."User" ADD COLUMN     "createdById" TEXT,
 ADD COLUMN     "isVerified" BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN     "verifiedById" TEXT;

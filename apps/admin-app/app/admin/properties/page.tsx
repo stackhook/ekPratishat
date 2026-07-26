@@ -51,11 +51,6 @@ export default function PropertiesListPage() {
 
     const effectiveStaffId = user?.role === "staff" ? user.id : staffId;
 
-    console.log("render", {
-        user,
-        userLoading,
-        effectiveStaffId,
-    });
 
     const { data, isLoading, isError, error } = useGetAllProperties({ page, pageSize: 20, c_id, isActive, isFeatured, type, isVerified, q, staffId: effectiveStaffId, enabled:!userLoading });
     const { data: categories, isLoading: categoriesLoading } = useGetAllCategories();

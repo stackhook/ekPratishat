@@ -1,9 +1,9 @@
 import { authenticatedFetch } from "@repo/shared-provider";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetLeads = ({page=1,limit=20,status="",dealType="",clientType="",q=""}) => {
+export const useGetLeads = ({page=1,limit=20,status="",dealType="",clientType="",q="",c_id=""}) => {
     return useQuery({
-        queryKey: ["leads", {page,status,dealType,clientType,q}],
+        queryKey: ["leads", {page,status,dealType,clientType,q,c_id}],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: String(page),
@@ -12,6 +12,7 @@ export const useGetLeads = ({page=1,limit=20,status="",dealType="",clientType=""
                 ...(status && {status}),
                 ...(dealType && {dealType}),
                 ...(clientType && {clientType}),
+                ...(c_id && {c_id})
             })
             return authenticatedFetch(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/lead?${params.toString()}`,

@@ -114,6 +114,8 @@ export interface Lead {
   leadCode:number;
   name: string | null;
   contact: string;
+  categoryId:string | null;
+  category: {id:string; name:string;} | null;
   email: string | null;
   source: string;
   clientType: "BUYER" | "SELLER";
