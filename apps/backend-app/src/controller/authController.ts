@@ -1,10 +1,18 @@
-import { prisma } from "@repo/database";
+import { DatabaseError, handlePrismaError, prisma } from "@repo/database";
 import { userSigninSchema, userSignupSchema } from "@repo/validators";
 import { Request, Response } from "express";
 import { comparePassword, hashPassword } from "../utils/hash.js";
 import { generateToken, verifyToken } from "../utils/jwt.js";
 import { AppError, createUser } from "@repo/functions";
 import { triggerFrontendUpdate } from "../utils/revalidator.js";
+
+
+interface CreateDesignationBody {
+  title: string;
+  description?: string;
+  permissionIds: string[];
+  multipleAssignment:boolean;
+}
 
 export const signIn = async (req: Request, res: Response) => {
   try {
@@ -448,3 +456,61 @@ export async function changeUserRole(req: Request, res: Response) {
     });
   }
 }
+
+
+export const createDesignation = async (
+  req: Request<{}, {}, CreateDesignationBody>,
+  res: Response
+) => {
+  try {
+    const { title, description, permissionIds, multipleAssignment } = req.body;
+
+    if (!title || !Array.isArray(permissionIds)) {
+      throw new AppError(400,"Title and permissionIds array are required", );
+    }
+
+    const designation = await prisma.designation.create({
+      data: {
+        title:title.trim().toUpperCase(),
+        description,
+        multipleAssignment,
+        permissions: {
+          create: permissionIds.map((permissionId) => ({
+            permission: {
+              connect: { id: permissionId },
+            },
+          })),
+        },
+      },
+      include: {
+        permissions: {
+          include: {
+            permission: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json({
+      designation,
+      message: "Designation Created Successfully"
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.status).json({
+        message: error.message,
+      });
+    }
+
+    try {
+      handlePrismaError(error);
+    } catch (dbError) {
+      if (dbError instanceof DatabaseError) {
+        return res
+          .status(dbError.statusCode)
+          .json({ message: dbError.message });
+      }
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+};

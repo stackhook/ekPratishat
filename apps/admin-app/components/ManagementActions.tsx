@@ -8,6 +8,7 @@ import VerifyBadge from "./VerifyBadge";
 import RemoveUser from "./RemoveAgent";
 import AssignZoneToAgent from "./AssingZoneToAgent";
 import UserRoleModal from "./UserRoleModal";
+import DesignationModal from "./userSpecific/DesignationModal";
 
 export default function ManagementActions({ agent }: { agent: AgentDetailType }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -94,6 +95,7 @@ export default function ManagementActions({ agent }: { agent: AgentDetailType })
                                     <div className="text-sm text-secondary-500 dark:text-secondary-400">View user activity and actions</div>
                                 </div>
                             </button>
+                            <DesignationModal userId={agent.id} oldDesignationId={agent.designationId}/>
                         </div>
                     </div>
 

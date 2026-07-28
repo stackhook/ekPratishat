@@ -50,6 +50,10 @@ export default function BasicInfoSection({ agent }: { agent: AgentDetailType }) 
                 </div>
                 <p className="text-secondary-600 dark:text-secondary-300">Email: {agent.email}</p>
                 <p className="text-secondary-600 dark:text-secondary-300">Contact: {agent.contact}</p>
+                {
+                    agent?.designation?.title && <p className="text-secondary-600 dark:text-secondary-300">Designation: <span className="font-bold text-blue-600">{agent?.designation?.title}</span></p>
+                }
+
                 {/* <p className="text-secondary-600 dark:text-secondary-300">
                     Role: {agent.role?.toUpperCase() || "Unknown"}
                 </p> */}

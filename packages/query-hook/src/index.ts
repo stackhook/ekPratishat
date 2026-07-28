@@ -16,3 +16,5 @@ export * from "./queries/leadQueries";
 export * from "./queries/notificationQueries";
 export * from "./mutationHooks/notificationMutations";
 
+export * from "./queries/permissionQueries";
+

@@ -180,3 +180,22 @@ export const useGetMyTotalPropertyValue = () => {
     refetchOnWindowFocus: true,
   }); 
 }
+
+
+export const useGetAllDesignations = (open:boolean) => {
+  return useQuery({
+    queryKey: ["all-designations"],
+    queryFn: async () => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/permissions/designations`,
+        { method: "GET"},
+      );
+    },
+    staleTime: 2 * 60 * 60 * 1000,
+    refetchInterval: 2 * 60 * 60 * 1000,
+    retry: 1,
+    retryDelay: 2000,
+    refetchOnWindowFocus: true,
+    enabled:open
+  }); 
+}

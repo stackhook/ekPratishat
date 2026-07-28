@@ -7,6 +7,9 @@ import {
 import { AppError } from "@repo/functions";
 import { Request, Response } from "express";
 
+
+
+
 export async function getStaff(req: Request, res: Response) {
   try {
     const result = await prisma.user.findMany({
@@ -182,3 +185,5 @@ export async function getTotalValuation(req: Request, res: Response) {
     }
   }
 }
+
+//Create designation

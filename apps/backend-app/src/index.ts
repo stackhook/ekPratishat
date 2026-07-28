@@ -11,6 +11,7 @@ import userRouter from './routes/userRoute.js';
 import testRouter from './routes/testRouter.js';
 import leadRouter from './routes/leadRoute.js';
 import notificationRouter from './routes/notificationRoute.js';
+import permissionRouter from './routes/permissionRoute.js';
 
 // dotenv.config();
 
@@ -62,6 +63,7 @@ app.use("/users", userRouter);
 // app.use("/test", testRouter);
 app.use("/lead", leadRouter);
 app.use("/notifications", notificationRouter);
+app.use("/permissions", permissionRouter);
 
 
 app.listen(PORT, () => {

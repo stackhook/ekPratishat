@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetAgentDetail } from "@repo/query-hook";
+import { useGetAgentDetail, useGetAllDesignations } from "@repo/query-hook";
 import AnimateLoader from "@repo/ui/animateLoader";
 import { AgentDetailType } from "@repo/validators";
 import { useParams } from "next/navigation";
@@ -15,8 +15,9 @@ import RevokeZoneAssigned from "./userSpecific/RevokeZoneAssigned";
 export default function AgentDetail() {
     const param = useParams();
     const { data, isLoading, isError, error } = useGetAgentDetail(param.id as string);
+    
 
-    if (isLoading) {
+    if (isLoading ) {
         return (
             <div className="flex flex-1 items-center justify-center h-full">
                 <AnimateLoader />
@@ -24,8 +25,8 @@ export default function AgentDetail() {
         );
     }
 
-    if (isError) {
-        const message = error.message || "Couldn't fetch data";
+    if (isError ) {
+        const message = error?.message || "Couldn't fetch data";
         return (
             <div className="flex flex-1 items-center justify-center text-red-500 text-lg md:text-xl h-full">{message}</div>
         );

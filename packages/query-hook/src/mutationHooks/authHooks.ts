@@ -1,4 +1,5 @@
 // @repo/query-hook/src/hooks/useCreateUser.ts
+import { authenticatedFetch } from "@repo/shared-provider";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -20,6 +21,13 @@ type ErrorType = {
   fieldErrors?: FieldErrorType;
 }
 
+interface DesignationPayload {
+  title:string;
+  description?:string;
+  permissionIds:string[];
+  multipleAssignment:boolean;
+
+}
 
 export const useCreateUser = () => {
   return useMutation<any,ErrorType,FormData>({
@@ -89,3 +97,45 @@ export const useSignInUser = () => {
     },
   });
 };
+
+
+export const useCreateDesignation = () => {
+  return useMutation({
+    mutationFn: async (payload:DesignationPayload) => {
+          return authenticatedFetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/create-designation`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            },
+          );
+        },
+        onError: (error) => {
+          toast.error(error.message || "Operation Failed!!!");
+        },
+  })
+  
+}
+
+export const useAssignDesignation = () => {
+   return useMutation({
+    mutationFn: async ({id, userId} : {id:string,userId:string}) => {
+          return authenticatedFetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/permissions/assign-designation/${id}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({userId}),
+            },
+          );
+        },
+        onError: (error) => {
+          toast.error(error.message || "Operation Failed!!!");
+        },
+  })
+}

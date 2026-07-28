@@ -21,6 +21,14 @@ model User {
   email         String  @unique
   password      String
 
+  designation   Designation? @relation(fields: [designationId], references: [id])
+  designationId String?
+
+  designationAssignedById String?
+  designationAssignedBy User? @relation("DesignationAddedBy", fields: [designationAssignedById], references: [id])
+  designationAssigned User[] @relation("DesignationAddedBy")
+
+
   createdById  String? // who created this user (admin or staff)
   createdBy    User?   @relation("UserCreatedBy", fields: [createdById], references: [id])
   createdUsers User[]  @relation("UserCreatedBy") // users created by this admin/staff
@@ -319,7 +327,7 @@ model Lead {
   coordinates String?
   managedById String?
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  category    Category?  @relation(fields: [categoryId], references: [id])
   managedBy   User?      @relation("LeadsManagedBy", fields: [managedById], references: [id])
   notes       Json?
   followUpAt  DateTime?
@@ -401,4 +409,40 @@ enum AuditAction {
   ASSIGN
   LOGIN
   LOGOUT
+}
+
+model Designation {
+  id          String  @id @default(uuid())
+  title       String  @unique // e.g., "Senior Agent", "Front Desk"
+  description String?
+
+  users       User[]
+  permissions DesignationPermission[]
+
+  multipleAssignment Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Permission {
+  id       String @id @default(uuid())
+  resource String // e.g., "leads", "properties"
+  action   String // e.g., "create", "read", "update", "delete"
+  scope    String // e.g., "all", "own"
+
+  designations DesignationPermission[]
+
+  @@unique([resource, action, scope])
+}
+
+// Join Table for Many-to-Many relationship
+model DesignationPermission {
+  designation   Designation @relation(fields: [designationId], references: [id], onDelete: Cascade)
+  designationId String
+
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permissionId String
+
+  @@id([designationId, permissionId])
 }

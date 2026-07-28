@@ -17,6 +17,12 @@ export async function getAgentDetai(id: string) {
                 createdAt: true,
                 email: true,
                 role: true,
+                designationId:true,
+                designation: {
+                    select: {
+                        title:true
+                    }
+                },
                 secondContact:true,
                 createdBy: {
                     select: {
