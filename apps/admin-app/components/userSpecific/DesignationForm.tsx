@@ -18,7 +18,7 @@ interface DesignationProps {
   title: string;
   description?: string;
   permissionIds: string[];
-  multipleAssignment?: boolean
+  multipleAssignment: boolean
 }
 
 
@@ -35,7 +35,8 @@ export default function DesignationForm({ designation, isEditMode = false, id = 
   const [title, setTitle] = useState(designation.title || "");
   const [description, setDescription] = useState(designation.description || "");
   const [selectedPermissionIds, setSelectedPermissionIds] = useState<string[]>(designation.permissionIds || []);
-  const [multipleAssignment, setMultipleAssignment] = useState<boolean>(designation.multipleAssignment || true);
+  const [multipleAssignment, setMultipleAssignment] = useState<boolean>(designation.multipleAssignment);
+
 
   if (isLoading) {
     return (
@@ -87,10 +88,10 @@ export default function DesignationForm({ designation, isEditMode = false, id = 
           setSelectedPermissionIds([]);
           setMultipleAssignment(true);
           queryClient.invalidateQueries({
-            queryKey:["all-designations"]
+            queryKey: ["all-designations"]
           });
           queryClient.invalidateQueries({
-            queryKey:["designation",id]
+            queryKey: ["designation", id]
           });
           router.replace("/admin/users/designation")
         }
@@ -111,6 +112,10 @@ export default function DesignationForm({ designation, isEditMode = false, id = 
         setDescription("");
         setSelectedPermissionIds([]);
         setMultipleAssignment(true);
+        queryClient.invalidateQueries({
+          queryKey: ["all-designations"]
+        });
+        router.replace("/admin/users/designation")
       }
     });
   };
@@ -250,7 +255,13 @@ export default function DesignationForm({ designation, isEditMode = false, id = 
             disabled={isPending || selectedPermissionIds.length === 0}
             className="px-5 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            {isPending ? "Creating..." : "Save Designation"}
+            {isEditMode
+              ? isPending
+                ? "Updating..."
+                : "Update Designation"
+              : isPending
+                ? "Creating..."
+                : "Create Designation"}
           </button>
         </div>
       </form>

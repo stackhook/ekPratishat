@@ -49,6 +49,7 @@ export default function DesignationEditPage() {
         multipleAssignment: data?.multipleAssignment,
         permissionIds:permsId
     }
+  
 
     return (
         <>
