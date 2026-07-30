@@ -5,14 +5,18 @@ import { PropertyPortfolioSummarySkeleton } from "./PropertyPortFolioSkeleton";
 import PropertyPortfolioSummary from "./PorpertyPortFolioSummary";
 
 export default function MyCommission() {
+    const {data:userData, isLoading: isUserLoading, isError: isUserError} = useUser();
+
+    const hasAccess = userData?.designation?.trim().toUpperCase() === "LIASON OFFICER";
+
     const { data, isLoading, isError, error } =
-        useGetMyTotalPropertyValue();
-    const {data:user, isLoading: userLoading, isError: userError} = useUser();
-    if (isLoading || userLoading) {
+        useGetMyTotalPropertyValue({enabled: !!userData && hasAccess});
+
+    if (isLoading || isUserLoading) {
         return <PropertyPortfolioSummarySkeleton />;
     }
 
-    if(userError || user?.role !== "staff") {
+    if(isUserError || !hasAccess || !data) {
         return null;
     }
 

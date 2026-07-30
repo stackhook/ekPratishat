@@ -5,6 +5,7 @@ declare namespace Express {
             role: string;
             name:string;
             perms?:string[];
-        }
+        };
+        permissionScope?: "own" | "all";
     }
 }

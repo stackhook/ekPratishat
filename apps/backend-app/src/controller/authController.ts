@@ -100,6 +100,7 @@ export const signIn = async (req: Request, res: Response) => {
         role: user.role,
         name: user.name,
         profileImageUrl: user.profileImageUrl,
+        designation:user.designation?.title ?? null
       },
     });
   } catch (err) {
@@ -303,6 +304,11 @@ export const myInfo = async (req: Request, res: Response) => {
         role:true,
         profileImageUrl:true,
         isActive: true,
+        designation: {
+          select: {
+            title:true,
+          }
+        },
         _count: {
           select: {
             notificationReceive: {
@@ -336,7 +342,8 @@ export const myInfo = async (req: Request, res: Response) => {
         role: checkUser.role,
         name: checkUser.name,
         profileImageUrl: checkUser.profileImageUrl,
-        notification: checkUser._count.notificationReceive
+        notification: checkUser._count.notificationReceive,
+        designation:checkUser.designation?.title ?? null
       },
     });
   } catch (err) {

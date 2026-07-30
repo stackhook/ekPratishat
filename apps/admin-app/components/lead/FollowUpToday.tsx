@@ -22,9 +22,9 @@ export default function FollowUpToday() {
   const { data: userData, isLoading: isUserLoading, isError: isUserError } = useUser();
   
   // Strict matching against role conventions
-  const isAdmin = userData?.role === "admin";
+  const isAdmin = userData?.role === "admin" || userData?.designation?.trim().toUpperCase() === "RECEPTIONIST";
 
-  const { data: followups, isLoading: followUpLoading } = useGetFollowUpToday({
+  const { data: followups, isLoading: followUpLoading, isError:isFollowError } = useGetFollowUpToday({
     enabled: !!userData && isAdmin,
   });
 
@@ -65,7 +65,7 @@ export default function FollowUpToday() {
   }, [followups, currentTime]);
 
   // 1. Silent early bail-out protection for non-admins and load cycles
-  if (isUserLoading || isUserError || !isAdmin) {
+  if (isUserLoading || isUserError || !isAdmin || isFollowError) {
     return null;
   }
 

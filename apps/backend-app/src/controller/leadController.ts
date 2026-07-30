@@ -178,18 +178,26 @@ export async function getLeadById(req: Request, res: Response) {
       throw new AppError(400, "Invalid Lead id");
     }
 
+    const userId = req.user?.id;
+    const scope = req.permissionScope;
+
+    const whereCondition = {
+      id,
+      ...(scope === "own" && { managedById: userId }),
+    };
+
     const result = await prisma.lead.findUnique({
-      where: { id },
+      where: whereCondition,
       include: {
         managedBy: { select: { name: true, email: true } },
         updatedBy: { select: { name: true, email: true } },
-        category: {select: {name:true,id:true}}
+        category: { select: { name: true, id: true } },
       },
     });
 
     if (!result) {
       return res.status(404).json({
-        message: "No lead for the id found!!!",
+        message: "Lead not found or you do not have permission to view it",
       });
     }
 
@@ -214,6 +222,7 @@ export async function updateLeadStatus(req: Request, res: Response) {
     const { id } = req.params;
     const user = req.user;
     const { status, remarks, followUpAt } = req.body;
+    const scope = req.permissionScope;
 
     const allowedStatuses = [
       "CONTACTED",
@@ -236,12 +245,22 @@ export async function updateLeadStatus(req: Request, res: Response) {
       throw new AppError(400, "Invalid Lead Id");
     }
 
+    const whereCondition = {
+      id,
+      ...(scope === "own" && { managedById: user.id }),
+    };
+
     const checkExistingStatus = await prisma.lead.findUnique({
-      where: { id },
+      where: whereCondition,
     });
 
     if (!checkExistingStatus) {
-      return res.status(404).json({ message: "Lead record not found." });
+      return res
+        .status(404)
+        .json({
+          message:
+            "Lead record not found or You may not have permission to update this record.",
+        });
     }
 
     if (checkExistingStatus.status === status) {
@@ -250,11 +269,11 @@ export async function updateLeadStatus(req: Request, res: Response) {
       });
     }
 
-    if (user.role !== "admin" && checkExistingStatus.managedById !== user.id) {
-      return res.status(403).json({
-        message: "You are not authorized to perform this operation",
-      });
-    }
+    // if (user.role !== "admin" && checkExistingStatus.managedById !== user.id) {
+    //   return res.status(403).json({
+    //     message: "You are not authorized to perform this operation",
+    //   });
+    // }
 
     if (
       checkExistingStatus?.status === "WON" ||
@@ -390,23 +409,34 @@ export async function updateFollowUpTime(req: Request, res: Response) {
     const user = req.user;
     const { followUpAt } = req.body;
     const { id } = req.params;
+    const scope = req.permissionScope;
     if (!id || Array.isArray(id)) {
       throw new AppError(400, "Invalid Lead Id");
     }
 
+    const whereCondition = {
+      id,
+      ...(scope === "own" && { managedById: user.id }),
+    };
+
     const checkExistingStatus = await prisma.lead.findUnique({
-      where: { id },
+      where: whereCondition,
     });
 
     if (!checkExistingStatus) {
-      return res.status(404).json({ message: "Lead record not found." });
+      return res
+        .status(404)
+        .json({
+          message:
+            "Lead record not found or You may not have permission to update this record.",
+        });
     }
 
-    if (user.role !== "admin" && checkExistingStatus.managedById !== user.id) {
-      return res.status(403).json({
-        message: "You are not authorized to perform this operation",
-      });
-    }
+    // if (user.role !== "admin" && checkExistingStatus.managedById !== user.id) {
+    //   return res.status(403).json({
+    //     message: "You are not authorized to perform this operation",
+    //   });
+    // }
 
     if (
       checkExistingStatus?.status === "WON" ||
@@ -512,7 +542,7 @@ export async function updateLeadBasicInformation(req: Request, res: Response) {
     const { id } = req.params;
     const user = req.user;
     const { name, email, coordinates, notes } = req.body;
-
+    const scope = req.permissionScope;
     const parsedData = UpdateLeadSchema.safeParse(req.body);
 
     if (!parsedData.success) {
@@ -523,8 +553,13 @@ export async function updateLeadBasicInformation(req: Request, res: Response) {
       throw new AppError(400, "Invalid Lead Id");
     }
 
+    const whereCondition = {
+      id,
+      ...(scope === "own" && { managedById: user.id }),
+    };
+
     const checkExistingStatus = await prisma.lead.findUnique({
-      where: { id },
+      where: whereCondition,
     });
 
     if (!checkExistingStatus) {
@@ -649,6 +684,7 @@ export async function changeHandler(req: Request, res: Response) {
     const { handlerId } = req.query;
     const user = req.user;
     const { id } = req.params;
+    const scope = req.permissionScope;
 
     if (typeof handlerId !== "string" || handlerId.trim() === "") {
       return res.status(400).json({
@@ -675,8 +711,13 @@ export async function changeHandler(req: Request, res: Response) {
         throw new AppError(404, "No such handler exist!!!");
       }
 
+      const whereCondition = {
+        id,
+        ...(scope === "own" && { managedById: user.id }),
+      };
+
       const existingLead = await tx.lead.findUnique({
-        where: { id },
+        where: whereCondition,
         select: {
           id: true,
           managedById: true,
@@ -684,12 +725,12 @@ export async function changeHandler(req: Request, res: Response) {
       });
 
       if (!existingLead) {
-        throw new AppError(404, "Lead not found");
+        throw new AppError(404, "Lead not found or You may not have permission to perform this action.");
       }
 
-      if (user.role === "staff" && user.id !== existingLead.managedById) {
-        throw new AppError(403, "You are unauthorized to carry this action");
-      }
+      // if (user.role === "staff" && user.id !== existingLead.managedById) {
+      //   throw new AppError(403, "You are unauthorized to carry this action");
+      // }
 
       if (existingLead.managedById === checkIfUserExist.id) {
         throw new AppError(400, "Lead already assigned to this handler");
@@ -789,6 +830,13 @@ export async function getUserLeads(req: Request, res: Response) {
 export async function getTodayFollowUpLead(req: Request, res: Response) {
   try {
     // 1. Get the current exact absolute timestamp
+    const permissionScope = req.permissionScope;
+    if (permissionScope !== "all") {
+      return res.status(403).json({
+        message: "Unauthorized!!!",
+      });
+    }
+
     const now = new Date();
 
     // 2. Calculate the current time in Nepal by adding the 5h 45m offset (in milliseconds)
@@ -922,6 +970,7 @@ export const updateCompulsoryParameter = async (
     const { id } = req.params;
     const user = req.user;
     const { contact, source, dealType, clientType, categoryId } = req.body;
+    const scope = req.permissionScope;
 
     if (!id || Array.isArray(id)) {
       throw new AppError(400, "Invalid Lead Id");
@@ -936,8 +985,14 @@ export const updateCompulsoryParameter = async (
       });
     }
 
+    const whereCondition = {
+      id,
+      ...(scope === "own" && { managedById: user.id }),
+    };
+
+
     const existingLead = await prisma.lead.findUnique({
-      where: { id },
+      where: whereCondition,
     });
 
     if (!existingLead) {
@@ -959,7 +1014,7 @@ export const updateCompulsoryParameter = async (
           dealType,
           clientType,
           categoryId,
-          updatedById:user.id
+          updatedById: user.id,
         },
       });
       if (user.role === "staff") {
@@ -1025,24 +1080,28 @@ export const updateCompulsoryParameter = async (
 
       await tx.auditLog.create({
         data: {
-          actorId:user.id,
-          actorType:user.role,
-          actorName:user.name,
-          action:"UPDATE",
-          entityType:"Lead",
-          entityId:existingLead.id,
-          oldValues:{
+          actorId: user.id,
+          actorType: user.role,
+          actorName: user.name,
+          action: "UPDATE",
+          entityType: "Lead",
+          entityId: existingLead.id,
+          oldValues: {
             contact: existingLead.contact,
             source: existingLead.source,
             dealType: existingLead.dealType,
-            clientType:existingLead.clientType,
-            categoryId:existingLead.categoryId
+            clientType: existingLead.clientType,
+            categoryId: existingLead.categoryId,
           },
           newValues: {
-            contact,source,dealType,clientType,categoryId
-          }
-        }
-      })
+            contact,
+            source,
+            dealType,
+            clientType,
+            categoryId,
+          },
+        },
+      });
     });
     return res.status(200).json({
       ok: true,

@@ -164,7 +164,7 @@ export const useGetStaff = (open: boolean) => {
   });
 };
 
-export const useGetMyTotalPropertyValue = () => {
+export const useGetMyTotalPropertyValue = ({enabled} : {enabled: boolean}) => {
   return useQuery({
     queryKey: ["my-total-property-value"],
     queryFn: async () => {
@@ -178,6 +178,7 @@ export const useGetMyTotalPropertyValue = () => {
     retry: 1,
     retryDelay: 2000,
     refetchOnWindowFocus: true,
+    enabled:enabled
   }); 
 }
 
