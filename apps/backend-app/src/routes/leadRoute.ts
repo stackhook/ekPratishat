@@ -35,7 +35,7 @@ leadRouter.post("/poke/:id", checkAuthentication, requireAdmin, pokeLead);
 
 leadRouter.get("/", checkAuthentication, requireAdminOrStaff, getLeads);
 leadRouter.get("/user-leads", checkAuthentication, getUserLeads);
-leadRouter.get("/today-followups", checkAuthentication,requireAdminOrStaff, getTodayFollowUpLead);
+leadRouter.get("/today-followups", checkAuthentication,requireAdminOrStaff,getTodayFollowUpLead);
 leadRouter.get("/:id", checkAuthentication, requireAdminOrStaff,checkPermission("leads","read"), getLeadById);
 
 leadRouter.put(

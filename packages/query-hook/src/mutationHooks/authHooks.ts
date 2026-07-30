@@ -139,3 +139,24 @@ export const useAssignDesignation = () => {
         },
   })
 }
+
+
+export const useUpdateDesignation = () => {
+  return useMutation({
+    mutationFn: async ({id, payload} : {id:string, payload:DesignationPayload}) => {
+          return authenticatedFetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/edit-designation/${id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            },
+          );
+        },
+        onError: (error) => {
+          toast.error(error.message || "Operation Failed!!!");
+        },
+  })
+}

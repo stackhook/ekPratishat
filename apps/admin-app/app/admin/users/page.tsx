@@ -93,7 +93,7 @@ export default function UserListPage() {
                     <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight text-center">
                         Users List
                     </h1>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
 
                     <Link
                         href="/admin/users/add-user"
@@ -105,13 +105,13 @@ export default function UserListPage() {
                         <span className="tracking-wide">Add New User</span>
                     </Link>
                     <Link
-                        href="/admin/users/create-designation"
+                        href="/admin/users/designation"
                         className="group flex items-center gap-3 px-8 py-3.5 bg-white/10 hover:bg-gold backdrop-blur-md border border-white/20 hover:border-gold text-white rounded-full font-bold transition-all duration-300 shadow-2xl active:scale-95"
                     >
                         <div className="bg-gold group-hover:bg-white p-1 rounded-full transition-colors">
                             <Plus size={16} className="text-white group-hover:text-gold" strokeWidth={3} />
                         </div>
-                        <span className="tracking-wide">Add New Designation</span>
+                        <span className="tracking-wide">Designations</span>
 
                     </Link>
                     </div>

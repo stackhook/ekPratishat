@@ -43,7 +43,11 @@ export const getAllDesignations = async (req: Request, res: Response) => {
   try {
     const result = await prisma.designation.findMany({
       include: {
-        permissions: true,
+        permissions: {
+          include: {
+            permission: true,
+          },
+        },
       },
     });
     return res.status(201).json(result);
@@ -66,7 +70,7 @@ export const assignDesignation = async (req: Request, res: Response) => {
 
     const designation = await prisma.designation.findUnique({
       where: { id },
-      include: { users:true },
+      include: { users: true },
     });
 
     if (!designation) {
@@ -75,7 +79,7 @@ export const assignDesignation = async (req: Request, res: Response) => {
 
     if (!designation.multipleAssignment) {
       const isAssignedToOtherUser = designation.users.some(
-        (u) => u.id !== (userId),
+        (u) => u.id !== userId,
       );
 
       if (isAssignedToOtherUser) {
@@ -143,6 +147,41 @@ export const assignDesignation = async (req: Request, res: Response) => {
         message: error.message,
       });
     }
+    try {
+      // 🚀 Automatically checks and maps standard Prisma exceptions
+      handlePrismaError(error);
+    } catch (dbError) {
+      // 🎯 Catch the parsed DatabaseError explicitly
+      if (dbError instanceof DatabaseError) {
+        return res
+          .status(dbError.statusCode)
+          .json({ message: dbError.message });
+      }
+
+      // Generic fallback for non-database unexpected crashes
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+};
+
+export const getDesignationById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await prisma.designation.findUnique({
+      where: { id: id as string },
+      include: {
+        permissions: true
+      }
+    });
+
+    if (!result) {
+      return res.status(404).json({
+        message: "No Designation for Id exists",
+      });
+    }
+
+    return res.status(201).json(result);
+  } catch (error) {
     try {
       // 🚀 Automatically checks and maps standard Prisma exceptions
       handlePrismaError(error);

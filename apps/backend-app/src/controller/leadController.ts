@@ -829,14 +829,6 @@ export async function getUserLeads(req: Request, res: Response) {
 
 export async function getTodayFollowUpLead(req: Request, res: Response) {
   try {
-    // 1. Get the current exact absolute timestamp
-    const permissionScope = req.permissionScope;
-    if (permissionScope !== "all") {
-      return res.status(403).json({
-        message: "Unauthorized!!!",
-      });
-    }
-
     const now = new Date();
 
     // 2. Calculate the current time in Nepal by adding the 5h 45m offset (in milliseconds)

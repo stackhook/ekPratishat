@@ -6,12 +6,11 @@ import { generateToken, verifyToken } from "../utils/jwt.js";
 import { AppError, createUser } from "@repo/functions";
 import { triggerFrontendUpdate } from "../utils/revalidator.js";
 
-
 interface CreateDesignationBody {
   title: string;
   description?: string;
   permissionIds: string[];
-  multipleAssignment:boolean;
+  multipleAssignment: boolean;
 }
 
 export const signIn = async (req: Request, res: Response) => {
@@ -31,19 +30,18 @@ export const signIn = async (req: Request, res: Response) => {
           include: {
             permissions: {
               include: {
-                permission: true
-              }
-            }
-          }
-        }
-      }
-      
+                permission: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!user || !(await comparePassword(password, user.password))) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    
+
     if (!user.isActive) {
       return res
         .status(403)
@@ -57,12 +55,11 @@ export const signIn = async (req: Request, res: Response) => {
       }
     }
 
-    if (user.role === "staff" && !user.designationId){
+    if (user.role === "staff" && !user.designationId) {
       return res.status(403).json({
-        error:"You are not yet permitted!!!"
-      })
-    };
-
+        error: "You are not yet permitted!!!",
+      });
+    }
 
     let compactPermissions: string[] = [];
     if (user.role === "staff" && user.designation) {
@@ -72,20 +69,20 @@ export const signIn = async (req: Request, res: Response) => {
       });
     }
 
-
     const token = generateToken({
       userId: user.id,
       role: user.role,
       name: user.name,
       profileImageUrl: user.profileImageUrl,
-      ...(user.role === "staff" && { perms: compactPermissions })
+      ...(user.role === "staff" && { perms: compactPermissions }),
     });
 
     res.cookie("accessToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: (user.role !== "client") ? 2 * 60 * 60 * 1000 : 24 * 30 * 60 * 60 * 1000,
+      maxAge:
+        user.role !== "client" ? 2 * 60 * 60 * 1000 : 24 * 30 * 60 * 60 * 1000,
       path: "/", // cookie available for entire domain
       domain:
         process.env.NODE_ENV === "production"
@@ -100,7 +97,7 @@ export const signIn = async (req: Request, res: Response) => {
         role: user.role,
         name: user.name,
         profileImageUrl: user.profileImageUrl,
-        designation:user.designation?.title ?? null
+        designation: user.designation?.title ?? null,
       },
     });
   } catch (err) {
@@ -299,24 +296,24 @@ export const myInfo = async (req: Request, res: Response) => {
     const checkUser = await prisma.user.findUnique({
       where: { id: payload.userId, isActive: true },
       select: {
-        id:true,
-        name:true,
-        role:true,
-        profileImageUrl:true,
+        id: true,
+        name: true,
+        role: true,
+        profileImageUrl: true,
         isActive: true,
         designation: {
           select: {
-            title:true,
-          }
+            title: true,
+          },
         },
         _count: {
           select: {
             notificationReceive: {
-              where: {isRead: false}
-            }
-          }
-        }
-      }
+              where: { isRead: false },
+            },
+          },
+        },
+      },
     });
     if (!checkUser || !checkUser.isActive) {
       res.clearCookie("accessToken", {
@@ -343,7 +340,7 @@ export const myInfo = async (req: Request, res: Response) => {
         name: checkUser.name,
         profileImageUrl: checkUser.profileImageUrl,
         notification: checkUser._count.notificationReceive,
-        designation:checkUser.designation?.title ?? null
+        designation: checkUser.designation?.title ?? null,
       },
     });
   } catch (err) {
@@ -395,7 +392,7 @@ export const toggleActive = async (req: Request, res: Response) => {
           },
         }),
       ]);
-      triggerFrontendUpdate({tag: "properties"});
+      triggerFrontendUpdate({ tag: "properties" });
     } else if (!activeStatus) {
       const result = await prisma.user.update({
         where: { id: agentId },
@@ -422,7 +419,7 @@ export const toggleActive = async (req: Request, res: Response) => {
           },
         },
       });
-      triggerFrontendUpdate({tag: "properties"});
+      triggerFrontendUpdate({ tag: "properties" });
     }
 
     return res.status(200).json({
@@ -490,21 +487,20 @@ export async function changeUserRole(req: Request, res: Response) {
   }
 }
 
-
 export const createDesignation = async (
   req: Request<{}, {}, CreateDesignationBody>,
-  res: Response
+  res: Response,
 ) => {
   try {
     const { title, description, permissionIds, multipleAssignment } = req.body;
 
     if (!title || !Array.isArray(permissionIds)) {
-      throw new AppError(400,"Title and permissionIds array are required", );
+      throw new AppError(400, "Title and permissionIds array are required");
     }
 
     const designation = await prisma.designation.create({
       data: {
-        title:title.trim().toUpperCase(),
+        title: title.trim().toUpperCase(),
         description,
         multipleAssignment,
         permissions: {
@@ -526,7 +522,77 @@ export const createDesignation = async (
 
     return res.status(201).json({
       designation,
-      message: "Designation Created Successfully"
+      message: "Designation Created Successfully",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.status).json({
+        message: error.message,
+      });
+    }
+
+    try {
+      handlePrismaError(error);
+    } catch (dbError) {
+      if (dbError instanceof DatabaseError) {
+        return res
+          .status(dbError.statusCode)
+          .json({ message: dbError.message });
+      }
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+};
+
+export const updateDesignation = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = req.user;
+    const { title, description, permissionIds, multipleAssignment } = req.body;
+
+    if (!title || !Array.isArray(permissionIds)) {
+      throw new AppError(400, "Title and permissionIds array are required");
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const designation = await tx.designation.update({
+        where: { id: id as string },
+        data: {
+          title: title.trim(),
+          description: description ?? null,
+          multipleAssignment: Boolean(multipleAssignment),
+        },
+      });
+
+      // Step B: Wipe all existing permissions associated with this designation
+      await tx.designationPermission.deleteMany({
+        where: { designationId: id as string },
+      });
+
+      // Step C: Bulk-insert the newly selected permissions (if array is not empty)
+      if (permissionIds.length > 0) {
+        await tx.designationPermission.createMany({
+          data: permissionIds.map((permissionId: string) => ({
+            designationId: id as string,
+            permissionId,
+          })),
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          actorType: user.role,
+          actorId:user.id,
+          actorName: user.name,
+          action: "UPDATE",
+          entityType: "Designation",
+          entityId: designation.id,
+        }
+      })
+    });
+
+    return res.status(200).json({
+      message: "Position updated Successfully",
     });
   } catch (error) {
     if (error instanceof AppError) {

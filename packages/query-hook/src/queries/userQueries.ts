@@ -200,3 +200,24 @@ export const useGetAllDesignations = (open:boolean) => {
     enabled:open
   }); 
 }
+
+
+export const useGetDesignationById = (id:string | null) => {
+  return useQuery({
+    queryKey: ["designation", id],
+    queryFn: async () => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/permissions/designation/${id}`,
+        { method: "GET"},
+      );
+    },
+    staleTime: 2 * 60 * 60 * 1000,
+    refetchInterval: 2 * 60 * 60 * 1000,
+    retry: 1,
+    retryDelay: 2000,
+    refetchOnWindowFocus: true,
+    enabled: !!id
+  })
+}
+
+
