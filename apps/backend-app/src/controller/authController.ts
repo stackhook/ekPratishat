@@ -16,8 +16,6 @@ interface CreateDesignationBody {
 
 export const signIn = async (req: Request, res: Response) => {
   try {
-    console.log("Signin called");
-    console.log(req.body);
     const result = userSigninSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ error: result.error.issues });
@@ -28,12 +26,29 @@ export const signIn = async (req: Request, res: Response) => {
       where: {
         contact,
       },
+      include: {
+        designation: {
+          include: {
+            permissions: {
+              include: {
+                permission: true
+              }
+            }
+          }
+        }
+      }
+      
     });
 
     if (!user || !(await comparePassword(password, user.password))) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-
+    
+    if (!user.isActive) {
+      return res
+        .status(403)
+        .json({ error: "Account is deactivated. Please contact support." });
+    }
     if (user.role === "partner" || user.role === "staff") {
       if (!user.isVerified) {
         return res
@@ -42,24 +57,35 @@ export const signIn = async (req: Request, res: Response) => {
       }
     }
 
-    if (!user.isActive) {
-      return res
-        .status(403)
-        .json({ error: "Account is deactivated. Please contact support." });
+    if (user.role === "staff" && !user.designationId){
+      return res.status(403).json({
+        error:"You are not yet permitted!!!"
+      })
+    };
+
+
+    let compactPermissions: string[] = [];
+    if (user.role === "staff" && user.designation) {
+      compactPermissions = user.designation.permissions.map((dp) => {
+        const p = dp.permission;
+        return `${p.resource}:${p.action}:${p.scope}`;
+      });
     }
+
 
     const token = generateToken({
       userId: user.id,
       role: user.role,
       name: user.name,
       profileImageUrl: user.profileImageUrl,
+      ...(user.role === "staff" && { perms: compactPermissions })
     });
 
     res.cookie("accessToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 24 * 30 * 60 * 60 * 1000,
+      maxAge: (user.role !== "client") ? 2 * 60 * 60 * 1000 : 24 * 30 * 60 * 60 * 1000,
       path: "/", // cookie available for entire domain
       domain:
         process.env.NODE_ENV === "production"
@@ -77,9 +103,9 @@ export const signIn = async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({
       error: "Internal Server Error!!!",
-      err,
     });
   }
 };

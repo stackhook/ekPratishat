@@ -47,7 +47,7 @@ export const checkAuthentication = async (
         message: "Account is Deactivated!!!",
       });
     }
-    req.user = { id: payload.userId, role: payload.role, name: payload.name };
+    req.user = { id: payload.userId, role: payload.role, name: payload.name,perms:payload?.perms || [] };
     next();
   } catch (err) {
     return res.status(401).json({

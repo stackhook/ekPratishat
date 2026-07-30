@@ -7,10 +7,13 @@ interface TokenPayload{
     role: string;
     name:string;
     profileImageUrl:string | null;
+    perms?:string[];
 }
 
-export const generateToken = ({ userId, role, name, profileImageUrl }: TokenPayload) => {
-    return jwt.sign({ userId, role, name, profileImageUrl }, JWT_SECRET)
+export const generateToken = ({ userId, role, name, profileImageUrl,perms }: TokenPayload) => {
+    return jwt.sign({ userId, role, name, profileImageUrl,perms }, JWT_SECRET , {
+        expiresIn: role === "client" ? "30d" : "2h",
+    })
 };
 
 export const verifyToken = (token: string) => {
