@@ -48,16 +48,16 @@ export default function PropertiesListPage() {
     }, [sp]);
 
     const { data: user, isLoading: userLoading, isError: isUserError, error: userError } = useUser();
+    
 
-    const effectiveStaffId = user?.role === "staff" ? user.id : staffId;
-
+    const effectiveStaffId = (user?.role === "staff" && user?.designation?.trim().toUpperCase() !== "RECEPTIONIST") ? user.id : staffId;
 
     const { data, isLoading, isError, error } = useGetAllProperties({ page, pageSize: 20, c_id, isActive, isFeatured, type, isVerified, q, staffId: effectiveStaffId, enabled:!userLoading });
     const { data: categories, isLoading: categoriesLoading } = useGetAllCategories();
 
 
     const shouldLoadStaff =
-        !userLoading && user?.role === "admin";
+        !userLoading && (user?.role === "admin" || user?.designation?.trim().toUpperCase() === "RECEPTIONIST");
 
     const { data: allStaff, isLoading: staffLoading, isError: staffError, error: staffErrorMessage } = useGetAdminStaff(shouldLoadStaff);
 
@@ -66,7 +66,7 @@ export default function PropertiesListPage() {
     useEffect(() => {
         if (!user) return;
 
-        if (user.role === "staff") {
+        if (user.role === "staff" && user?.designation?.trim().toUpperCase() !== "RECEPTIONIST") {
             const params = new URLSearchParams(sp.toString());
 
             if (params.get("staffId") !== user.id) {
@@ -262,7 +262,7 @@ export default function PropertiesListPage() {
                                 </select>
                             </FilterGroup>
                             {
-                                user.role === "admin" && (
+                                shouldLoadStaff && (
                                     <FilterGroup label="Handler" icon={<Filter size={14} />}>
                                         <select
                                             value={staffId}

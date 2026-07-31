@@ -23,7 +23,7 @@ export default function FollowUpToday() {
   
   // Strict matching against role conventions
   const isAdmin = userData?.role === "admin" || userData?.designation?.trim().toUpperCase() === "RECEPTIONIST";
-  console.log(isAdmin);
+  
 
   const { data: followups, isLoading: followUpLoading, isError:isFollowError } = useGetFollowUpToday({
     enabled: !!userData && isAdmin,
