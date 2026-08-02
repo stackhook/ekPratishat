@@ -15,6 +15,11 @@ export const checkPermission = (resource: string, action: string) => {
       return next();
     }
 
+    if(user.role === "client") {
+      req.permissionScope = "own";
+      return next();
+    }
+
     // 2. Reject non-staff users if missing explicit role handlers
     if (user.role !== "staff") {
       return res.status(403).json({ message: "Forbidden: Access restricted" });

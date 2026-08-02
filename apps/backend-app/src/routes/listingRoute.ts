@@ -33,6 +33,7 @@ import {
 } from "../controller/listingController.js";
 import { uploadUserFiles } from "../middleware/userUpload.js";
 import { addDistrictController, addMunicipalityController, addWardController } from "../controller/locationController.js";
+import { checkPermission } from "../middleware/permissionsCheck.js";
 
 const listingRouter = Router();
 
@@ -57,11 +58,11 @@ listingRouter.post("/amenities/add", checkAuthentication,requireAdmin, addAmenit
 listingRouter.post("/toggle-favourite", checkAuthentication, toggleFavourite);
 listingRouter.post("/check-favourite", checkFavourite)
 
-listingRouter.put("/edit-property/:id", checkAuthentication, uploadUserFiles.any(), updateProperty);
-listingRouter.put("/update-property-owner-info/:id", checkAuthentication,requireAdminOrStaff, updatePropertyOwnerInfo);
+listingRouter.put("/edit-property/:id", checkAuthentication, uploadUserFiles.any(),checkPermission("properties", "update"), updateProperty);
+listingRouter.put("/update-property-owner-info/:id", checkAuthentication,requireAdminOrStaff,checkPermission("properties", "update"), updatePropertyOwnerInfo);
 listingRouter.put("/mark-verified",checkAuthentication,requireAdmin,verifyListing);
 listingRouter.put("/mark-featured",checkAuthentication,requireAdmin,featureListing);
-listingRouter.put("/update-cover/:id", checkAuthentication,updateCoverImage);
+listingRouter.put("/update-cover/:id", checkAuthentication,checkPermission("properties", "update"),updateCoverImage);
 listingRouter.put("/update-category/:id",checkAuthentication,requireAdmin,uploadUserFiles.single("image"),updateCategory);
 listingRouter.put("/change-handler/:propertyId", checkAuthentication, requireAdmin, changePropertyHandler);
 listingRouter.put("/:id", checkAuthentication, requireAdmin, toggleActivateListing);

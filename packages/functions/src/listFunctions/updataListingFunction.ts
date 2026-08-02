@@ -9,6 +9,7 @@ import { AppError } from "../error.js";
 interface UserProp {
   userRole: string;
   userId: string;
+  scope: "all" | "own";
 }
 
 const IMAGE_DIR = "/var/www/ekPratisatMonorepo/images/propertyImage";
@@ -25,41 +26,41 @@ export async function updateListingFunction({
 }) {
   const limit = pLimit(MAX_CONCURRENT_IMAGES);
 
-   const imageUrls = await Promise.all(
+  const imageUrls = await Promise.all(
     imageFiles.map((file) =>
       limit(async () => {
         const ext = path.extname(file.originalname);
-  
+
         const baseName = path
           .basename(file.originalname, ext)
           .replace(/\s+/g, "-")
           .replace(/[^a-zA-Z0-9-_]/g, "")
           .toLowerCase();
-  
+
         const finalFilename = `${Date.now()}-${baseName || "property-image"}.webp`;
         const filePath = path.join(IMAGE_DIR, finalFilename);
-  
+
         const fileSizeMB = file.size / (1024 * 1024);
-  
+
         let sharpInstance = sharp(Buffer.from(file.buffer));
-  
+
         // Always convert to webp
         // Only resize/compress aggressively if file > 1MB
         if (fileSizeMB > 1) {
           sharpInstance = sharpInstance.resize(1600);
         }
-  
+
         await sharpInstance
           .toFormat("webp", {
             quality: fileSizeMB > 1 ? 85 : 90,
           })
           .toFile(filePath);
-  
+
         return `/image/propertyImage/${finalFilename}`;
-      })
-    )
+      }),
+    ),
   );
-  
+
   const data = body;
   const deleteImageIds: string[] = Array.isArray(body.deleteImageIds)
     ? body.deleteImageIds
@@ -70,20 +71,30 @@ export async function updateListingFunction({
       ? Prisma.sql`ST_SetSRID(ST_MakePoint(${data.lng}, ${data.lat}), 4326)`
       : Prisma.sql`"geoPoint"`;
   try {
+    const whereCondition = {
+      id: body.propertyId,
+      ...(userInfo.scope === "own" &&
+        (userInfo.userRole === "client"
+          ? { userId: userInfo.userId }
+          : { handlerId: userInfo.userId })), 
+    };
     const checkPropertyOwner = await prisma.property.findUnique({
-      where: { id: body.propertyId },
+      where: whereCondition,
     });
 
     if (!checkPropertyOwner) {
-      throw new AppError(404, "Property not found");
+      throw new AppError(
+        404,
+        "Property not found or you do not have permission to edit it",
+      );
     }
 
-    if (
-      checkPropertyOwner.userId !== userInfo.userId &&
-      userInfo.userRole !== "admin"
-    ) {
-      throw new AppError(403, "You are not authorized to edit the property");
-    }
+    // if (
+    //   checkPropertyOwner.userId !== userInfo.userId &&
+    //   userInfo.userRole !== "admin"
+    // ) {
+    //   throw new AppError(403, "You are not authorized to edit the property");
+    // }
 
     const listing = await prisma.$transaction(async (tx) => {
       const updated = await tx.$queryRaw<any[]>`
@@ -166,8 +177,8 @@ export async function updateListingFunction({
         });
       }
 
-      const targetingAmenities: string[] = Array.isArray(data.amenities) 
-        ? data.amenities 
+      const targetingAmenities: string[] = Array.isArray(data.amenities)
+        ? data.amenities
         : [];
 
       await tx.property.update({
@@ -195,7 +206,7 @@ export async function updateListingFunction({
       message: "Listing Updated Successfully!!!",
       listing,
       status: 200,
-      ownerId:checkPropertyOwner.userId
+      ownerId: checkPropertyOwner.userId,
     };
   } catch (error) {
     imageUrls.forEach((url) => {

@@ -591,6 +591,7 @@ export async function updateProperty(req: Request, res: Response) {
 
     const user = req.user;
     const body = req.body;
+    const scope = req.permissionScope || "own";
 
     const files = req.files as Express.Multer.File[];
     const normalized = Object.fromEntries(
@@ -652,7 +653,7 @@ export async function updateProperty(req: Request, res: Response) {
 
     const result = await updateListingFunction({
       body: parsed,
-      userInfo: { userId: user.id, userRole: user.role },
+      userInfo: { userId: user.id, userRole: user.role, scope: scope },
       imageFiles: adaptedFiles,
     });
 
@@ -871,13 +872,19 @@ export async function updatePropertyOwnerInfo(req: Request, res: Response) {
 
     const user = req.user;
     const { note } = req.body;
+    const scope = req.permissionScope;
+
+    const whereCondition = {
+      id,
+      ...(scope === "own" && { handlerId: user.id }),
+    }
 
     if (user.role !== "staff" && user.role !== "admin") {
       throw new AppError(403, "Unauthorized!!!");
     }
 
     const result = await prisma.property.update({
-      where: { id },
+      where: whereCondition,
       data: {
         leadNotes: note,
       },
@@ -887,16 +894,26 @@ export async function updatePropertyOwnerInfo(req: Request, res: Response) {
       ok: true,
       message: "User Info Added Successfully",
     });
-  } catch (err) {
-    if (err instanceof AppError) {
-      return res.status(err.status).json({
-        message: err.message,
+  } catch (error) {
+   if (error instanceof AppError) {
+      return res.status(error.status).json({
+        message: error.message,
       });
     }
-    console.error(err);
-    return res.status(500).json({
-      message: "Internal Server Error",
-    });
+    try {
+      // 🚀 Automatically checks and maps standard Prisma exceptions
+      handlePrismaError(error);
+    } catch (dbError) {
+      // 🎯 Catch the parsed DatabaseError explicitly
+      if (dbError instanceof DatabaseError) {
+        return res
+          .status(dbError.statusCode)
+          .json({ message: dbError.message });
+      }
+
+      // Generic fallback for non-database unexpected crashes
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
   }
 }
 
@@ -973,13 +990,22 @@ export async function updateCoverImage(req: Request, res: Response) {
     const user = req.user;
     const { id } = req.params;
     const { coverId } = req.query;
+    const scope = req.permissionScope;
 
     if (!id || Array.isArray(id) || !coverId) {
       throw new AppError(400, "Property ID and Cover Image ID are required");
     }
 
+    const whereCondition = {
+      id,
+      ...(scope === "own" &&
+        (user.role === "client"
+          ? { userId: user.id }
+          : { handlerId: user.id })), 
+    };
+
     const existingProperty = await prisma.property.findUnique({
-      where: { id },
+      where: whereCondition,
     });
 
     if (!existingProperty) {
