@@ -7,7 +7,7 @@ import { AppError } from "@repo/functions";
 export async function mobileAuthController(req: Request, res: Response) {
   const result = userSigninSchema.safeParse(req.body);
   if (!result.success) {
-    return res.status(400).json({ error: result.error.issues });
+    return res.status(400).json({ message: "Validation Failed!!!" });
   }
   const { contact, password } = result.data;
 
@@ -46,9 +46,11 @@ export async function getMyInfo(req: Request, res: Response) {
   let token: string | undefined;
 
   const authHeader = req.headers.authorization;
+  console.log(authHeader, "authHeader");
   if (authHeader?.startsWith("Bearer")) {
     token = authHeader.split(" ")[1];
   }
+  console.log("token", token);
 
   if (!token && req.cookies?.accessToken) {
     token = req.cookies.accessToken;
