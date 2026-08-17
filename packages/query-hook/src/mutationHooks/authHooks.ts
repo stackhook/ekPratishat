@@ -85,7 +85,6 @@ export const useSignInUser = () => {
       
       if (!res.ok) {
         const err = await res.json();
-        console.log(err)
         throw new Error(err.error || "Login failed");
       }
       const response = await res.json();

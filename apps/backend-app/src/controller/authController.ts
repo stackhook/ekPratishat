@@ -5,6 +5,7 @@ import { comparePassword, hashPassword } from "../utils/hash.js";
 import { generateToken, verifyToken } from "../utils/jwt.js";
 import { AppError, createUser } from "@repo/functions";
 import { triggerFrontendUpdate } from "../utils/revalidator.js";
+import { authenticateUser } from "../services/auth.services.js";
 
 interface CreateDesignationBody {
   title: string;
@@ -21,45 +22,47 @@ export const signIn = async (req: Request, res: Response) => {
     }
     const { contact, password } = result.data;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        contact,
-      },
-      include: {
-        designation: {
-          include: {
-            permissions: {
-              include: {
-                permission: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    // const user = await prisma.user.findUnique({
+    //   where: {
+    //     contact,
+    //   },
+    //   include: {
+    //     designation: {
+    //       include: {
+    //         permissions: {
+    //           include: {
+    //             permission: true,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
 
-    if (!user || !(await comparePassword(password, user.password))) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
+    // if (!user || !(await comparePassword(password, user.password))) {
+    //   return res.status(401).json({ error: "Invalid credentials" });
+    // }
 
-    if (!user.isActive) {
-      return res
-        .status(403)
-        .json({ error: "Account is deactivated. Please contact support." });
-    }
-    if (user.role === "partner" || user.role === "staff") {
-      if (!user.isVerified) {
-        return res
-          .status(403)
-          .json({ error: "Pending account verification!!!" });
-      }
-    }
+    // if (!user.isActive) {
+    //   return res
+    //     .status(403)
+    //     .json({ error: "Account is deactivated. Please contact support." });
+    // }
+    // if (user.role === "partner" || user.role === "staff") {
+    //   if (!user.isVerified) {
+    //     return res
+    //       .status(403)
+    //       .json({ error: "Pending account verification!!!" });
+    //   }
+    // }
 
-    if (user.role === "staff" && !user.designationId) {
-      return res.status(403).json({
-        error: "You are not yet permitted!!!",
-      });
-    }
+    // if (user.role === "staff" && !user.designationId) {
+    //   return res.status(403).json({
+    //     error: "You are not yet permitted!!!",
+    //   });
+    // }
+
+    const user = await authenticateUser({ contact, password });
 
     let compactPermissions: string[] = [];
     if (user.role === "staff" && user.designation) {
@@ -101,7 +104,12 @@ export const signIn = async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error(err);
+    if(err instanceof AppError) {
+      return res.status(err.status).json({
+        error: err.message,
+        fieldErrors: err.fieldErrors || null,
+      });
+    }
     return res.status(500).json({
       error: "Internal Server Error!!!",
     });

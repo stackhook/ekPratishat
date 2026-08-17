@@ -1145,3 +1145,47 @@ export const changePropertyHandler = async (req: Request, res: Response) => {
     }
   }
 };
+
+
+export const getRecentListings = async (req: Request, res: Response) => {
+  console.log("Fetching recent listings...");
+  try {
+    const listings = await prisma.property.findMany({
+      where: { isActive: true, verified: true, isSold:false },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        type: true,
+        tole: true,
+        verified: true,
+        images: {
+          select: {
+            url: true,
+            propertyId: true,
+          },
+        },
+        coverImageId: true,
+        category: {
+          select: {
+            name: true,
+            imageUrl:true,
+            id:true
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      ok: true,
+      listings,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
