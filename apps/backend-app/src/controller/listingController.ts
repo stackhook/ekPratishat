@@ -538,9 +538,20 @@ export async function getAllProperties(req: Request, res: Response) {
           type: true,
           verified: true,
           isFeatured: true,
+          price:true,
           propertyCode: true,
           tole: true,
           createdAt: true,
+          coverImage: {
+            select: {
+              url: true,
+            }
+          },
+          images: {
+            select: {
+              url:true
+            }
+          },
           location: {
             select: {
               name: true,

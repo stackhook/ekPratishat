@@ -10,6 +10,13 @@ export interface PropertyListing {
     type: SaleType; // "rent" | "saler"
     verified: boolean;
     isFeatured: boolean;
+    price:string;
+    coverImage: {
+        url: string;
+    },
+    images: {
+        url: string;
+    }[],
     propertyCode: number;
     tole: string;
     createdAt: Date | string; // Date if coming from server, string if via JSON API
