@@ -7,6 +7,7 @@ import {
   AppError,
   createListingFunction,
   fetchCategories,
+  fetchLocationTree,
   fetchPropertyDetal,
   updateCategoryFunction,
   updateListingFunction,
@@ -1200,3 +1201,20 @@ export const getRecentListings = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export async function fetchLocationData (req: Request, res: Response) {
+  try {
+    const result = await fetchLocationTree();
+    return res.status(result.status).json(result.result);
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.status).json({
+        message: error.message,
+      });
+    }
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+}

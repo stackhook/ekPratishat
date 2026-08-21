@@ -46,11 +46,10 @@ export async function getMyInfo(req: Request, res: Response) {
   let token: string | undefined;
 
   const authHeader = req.headers.authorization;
-  console.log(authHeader, "authHeader");
+
   if (authHeader?.startsWith("Bearer")) {
     token = authHeader.split(" ")[1];
   }
-  console.log("token", token);
 
   if (!token && req.cookies?.accessToken) {
     token = req.cookies.accessToken;
