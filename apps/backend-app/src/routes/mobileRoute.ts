@@ -10,5 +10,5 @@ mobileRouter.post("/auth", mobileAuthController);
 mobileRouter.get("/recent-listings", getRecentListings);
 mobileRouter.get("/properties", getAllProperties);
 mobileRouter.get("/me", getMyInfo);
-mobileRouter.get("/location",checkAuthentication, fetchLocationData);
+mobileRouter.get("/location",fetchLocationData);
 export default mobileRouter;
