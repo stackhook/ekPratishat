@@ -85,7 +85,7 @@ export const signIn = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:
-        user.role !== "client" ? 2 * 60 * 60 * 1000 : 24 * 30 * 60 * 60 * 1000,
+        user.role !== "client" ? 24 * 60 * 60 * 1000 : 24 * 30 * 60 * 60 * 1000,
       path: "/", // cookie available for entire domain
       domain:
         process.env.NODE_ENV === "production"
