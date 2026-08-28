@@ -43,6 +43,7 @@ export async function mobileAuthController(req: Request, res: Response) {
 }
 
 export async function getMyInfo(req: Request, res: Response) {
+  console.log("getMyInfo called");
   let token: string | undefined;
 
   const authHeader = req.headers.authorization;

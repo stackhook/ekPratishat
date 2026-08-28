@@ -12,7 +12,7 @@ interface TokenPayload{
 
 export const generateToken = ({ userId, role, name, profileImageUrl,perms }: TokenPayload) => {
     return jwt.sign({ userId, role, name, profileImageUrl,perms }, JWT_SECRET , {
-        expiresIn: role === "client" ? "30d" : "2h",
+        expiresIn: role === "client" ? "30d" : "1d" //30days for client, 1day for admin and staff
     })
 };
 

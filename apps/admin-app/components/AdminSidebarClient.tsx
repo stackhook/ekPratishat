@@ -131,7 +131,7 @@ export default function AdminSidebarClient() {
               Notifications
 
               {/* 🔥 Move conditional check here: Floating Messenger-style Badge only shows if > 0 */}
-              {user.notification > 0 && (
+              {user?.notification > 0 && (
                 <span
                   className={`absolute -top-2 -right-4 inline-flex items-center justify-center h-4 min-w-[16px] px-1 text-[10px] font-black rounded-full shadow-sm animate-bounce ring-2 ${pathname === "/admin/notifications"
                       ? "bg-white text-primary-500 ring-primary-500" // Inverts to stand out on the blue button
@@ -139,7 +139,7 @@ export default function AdminSidebarClient() {
                     }`}
                   style={{ animationDuration: '2s' }} // Smoother, non-distracting bounce speed
                 >
-                  {user.notification > 99 ? "99+" : user.notification}
+                  {user?.notification > 99 ? "99+" : user?.notification}
                 </span>
               )}
             </span>

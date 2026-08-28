@@ -128,12 +128,15 @@ export const addProperty = async (req: Request, res: Response) => {
     const body = req.body;
     const files = req.files as Express.Multer.File[];
 
+
     const normalized = Object.fromEntries(
       Object.entries(req.body).map(([key, value]) => [
         key,
         value === "" ? null : value,
       ]),
     );
+
+  
 
     const parsed = {
       ...normalized,
@@ -151,6 +154,7 @@ export const addProperty = async (req: Request, res: Response) => {
       landArea: normalized.landArea ? Number(normalized.landArea) : null,
       floorArea: normalized.floorArea ? Number(normalized.floorArea) : null,
       roadSize: normalized.roadSize ? Number(normalized.roadSize) : null,
+      facingDirection: normalized.facingDirection || null,
       propertyAge: normalized.propertyAge
         ? Number(normalized.propertyAge)
         : null,
