@@ -28,7 +28,7 @@ export async function authenticateUser({
     });
 
     if (!user || !(await comparePassword(password, user.password))) {
-      throw new AppError(401,"Invalid credentials");
+      throw new AppError(403,"Invalid credentials");
     };
 
     if (!user.isActive) {
