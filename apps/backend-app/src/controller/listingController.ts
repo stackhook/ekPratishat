@@ -166,6 +166,7 @@ export const addProperty = async (req: Request, res: Response) => {
       verified: normalized.verified === "true",
       negotiable: normalized.negotiable === "true",
       userId: user.id,
+      handlerId:user.role === "staff" ? user.id : null
     };
 
     if (parsed.verified && user.role !== "admin" && user.role !== "staff") {
@@ -511,7 +512,7 @@ export async function getAllProperties(req: Request, res: Response) {
       ...(q && {
         OR: [
           { title: { contains: q, mode: "insensitive" } },
-          { description: { contains: q, mode: "insensitive" } },
+          // { description: { contains: q, mode: "insensitive" } },
           { tole: { contains: q, mode: "insensitive" } },
           ...(numQ !== null ? [{ propertyCode: { equals: numQ } }] : []),
           {

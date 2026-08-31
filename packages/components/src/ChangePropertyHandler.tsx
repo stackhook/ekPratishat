@@ -10,13 +10,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useChangePropertyHandler, useGetAdminStaff, useGetStaff } from "@repo/query-hook";
 import { ShieldAlert } from "lucide-react";
 
-interface HandlerProps {
+type HandlerProps =  HandlerData | null;
+
+interface HandlerData {
     id: string;
     name: string;
     email?: string | null;
     contact: string;
 }
-
 
 
 const generateConfirmationText = () => {
@@ -29,7 +30,7 @@ export default function ChangePropertyHandler({ propertyId, currentHandler }: { 
     
     const [open, setOpen] = useState(false);
     const [confirmationText, setConfirmationText] = useState("");
-    const [handlerId, setHandlerId] = useState(currentHandler.id);
+    const [handlerId, setHandlerId] = useState(currentHandler?.id || "");
     const [reason, setReason] = useState("");
 
     const { data, isLoading, isError, error } = useGetStaff(open);
@@ -42,7 +43,7 @@ export default function ChangePropertyHandler({ propertyId, currentHandler }: { 
         setOpen(true);
         setConfirmationText(generateConfirmationText());
         setUserInput("");
-        setHandlerId(currentHandler.id);
+        setHandlerId(currentHandler?.id || "");
         setReason("");
     };
 
@@ -74,7 +75,7 @@ export default function ChangePropertyHandler({ propertyId, currentHandler }: { 
 
     };
 
-    const isConfirmButtonDisabled = isPending || userInput.trim() === "" || isLoading || isError || !handlerId || handlerId === currentHandler.id;
+    const isConfirmButtonDisabled = isPending || userInput.trim() === "" || isLoading || isError || !handlerId || handlerId === currentHandler?.id;
     
 
     return (
@@ -133,7 +134,7 @@ export default function ChangePropertyHandler({ propertyId, currentHandler }: { 
                                             </option>
                                         )}
 
-                                        {data?.map((handler: HandlerProps) => (
+                                        {data?.map((handler: HandlerData) => (
                                             <option key={handler.id} value={handler.id}>
                                                 {handler.name} - {handler.contact}
                                             </option>

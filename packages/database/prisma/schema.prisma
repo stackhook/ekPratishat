@@ -174,8 +174,8 @@ model Property {
   landAreaMeta    Json?
   noOfFloors      Int?
   propertyAge     Int?
-  handlerId       String
-  handler         User                                 @relation("PropertyHandler", fields: [handlerId], references: [id])
+  handlerId       String?
+  handler         User?                                 @relation("PropertyHandler", fields: [handlerId], references: [id])
   facingDirection String?
   floorArea       Decimal?                             @db.Decimal(12, 2)
   roadSize        Decimal?                             @db.Decimal(6, 2)

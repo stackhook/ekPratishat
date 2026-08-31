@@ -136,7 +136,7 @@ export async function createListingFunction({
     ${data.tole},
     ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326),
     ${data.features ? JSON.parse(data.features) : null},
-    ${body.userId}
+    ${body.handlerId ?? null}
 
   )
   RETURNING
