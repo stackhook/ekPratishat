@@ -47,11 +47,11 @@ export async function getMobileListing(req: Request, res: Response) {
         propertyCode: true,
         floorLevel: true,
         amenities: {
-            select: {
-                id:true,
-                name: true,
-                icon:true
-            },
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+          },
         },
         isFeatured: true,
 
@@ -128,3 +128,48 @@ export async function getMobileListing(req: Request, res: Response) {
     });
   }
 }
+
+export const fetchFavourites = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+
+    const result = await prisma.favourite.findMany({
+      where: {
+        userId: user?.id,
+      },
+      select: {
+        property: {
+          select: {
+            id: true,
+            title: true,
+            price: true,
+            type: true,
+            tole: true,
+            propertyCode: true,
+            isFeatured: true,
+            verified: true,
+            images: {
+              select: {
+                url: true,
+              },
+            },
+            category: {
+              select: {
+                name: true,
+              },
+            },
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    const properties = result.map((favourite) => favourite.property);
+
+    return res.status(200).json(properties);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
