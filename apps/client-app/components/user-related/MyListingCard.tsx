@@ -10,9 +10,12 @@ export interface Listing {
   price: number;
   type: string;
   tole: string;
+  propertyCode: number;
+  isFeatured: boolean;
   verified: boolean;
   images: { url: string }[];
   category: { name: string };
+  createdAt: Date | string;
 }
 
 export default function MyListingCard({ item }: { item: Listing }) {

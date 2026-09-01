@@ -92,7 +92,7 @@ export default async function MyListingPage({
     }
 
     const data = await res.json();
-    const listings = data.listing;
+    const listings = data.items;
     const meta = data.meta;
 
     return (

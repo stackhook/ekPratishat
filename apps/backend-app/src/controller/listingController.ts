@@ -246,6 +246,8 @@ export const getUserListings = async (req: Request, res: Response) => {
           price: true,
           type: true,
           tole: true,
+          propertyCode: true,
+          isFeatured:true,
           verified: true,
           images: {
             select: {
@@ -257,12 +259,13 @@ export const getUserListings = async (req: Request, res: Response) => {
               name: true,
             },
           },
+          createdAt: true,
         },
       }),
     ]);
 
     return res.status(200).json({
-      listing,
+      items:listing,
       meta: {
         total,
         page: Number(page),
