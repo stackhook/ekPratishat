@@ -132,8 +132,22 @@ export async function getMobileListing(req: Request, res: Response) {
 export const fetchFavourites = async (req: Request, res: Response) => {
   try {
     const user = req.user;
+    const { page = 1, pageSize = 10 } = req.query;
 
-    const result = await prisma.favourite.findMany({
+     if (Number(page) <= 0 || Number(pageSize) <= 0) {
+      return res.status(400).json({
+        message: "Page and pageSize must be positive integers",
+      });
+    }
+
+    const [total, result] = await Promise.all([
+      prisma.favourite.count({
+        where: {
+          userId: user?.id,
+        },
+      }),
+      
+     prisma.favourite.findMany({
       where: {
         userId: user?.id,
       },
@@ -162,11 +176,20 @@ export const fetchFavourites = async (req: Request, res: Response) => {
           },
         },
       },
-    });
+    })
+    ]);
 
     const properties = result.map((favourite) => favourite.property);
 
-    return res.status(200).json(properties);
+    return res.status(200).json({
+      items: properties,
+      meta: {
+        total,
+        page: Number(page),
+        pageSize: Number(pageSize),
+        totalPages: Math.max(1, Math.ceil(total / Number(pageSize))),
+      }
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Internal Server Error",
