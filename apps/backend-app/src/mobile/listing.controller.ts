@@ -168,13 +168,21 @@ export const fetchFavourites = async (req: Request, res: Response) => {
             propertyCode: true,
             isFeatured: true,
             verified: true,
+            coverImage: {
+              select: {
+                id:true,
+                url: true,
+              },
+            },
             images: {
               select: {
+                id:true,
                 url: true,
               },
             },
             category: {
               select: {
+                id:true,
                 name: true,
               },
             },
