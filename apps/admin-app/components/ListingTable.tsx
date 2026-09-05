@@ -12,9 +12,11 @@ export interface PropertyListing {
     isFeatured: boolean;
     price:string;
     coverImage: {
+        id:string;
         url: string;
     },
     images: {
+        id:string;
         url: string;
     }[],
     propertyCode: number;
@@ -23,10 +25,13 @@ export interface PropertyListing {
 
     // Nested Location Data
     location: {
+        id:string;
         name: string; // The Ward name (usually a number)
         municipality: {
+            id:string;
             name: string;
             district: {
+                id:string;
                 name: string;
             };
         };
@@ -34,6 +39,7 @@ export interface PropertyListing {
 
     // Nested Category Data
     category: {
+        id:string;
         name: string;
     };
 }

@@ -553,22 +553,27 @@ export async function getAllProperties(req: Request, res: Response) {
           createdAt: true,
           coverImage: {
             select: {
+              id:true,
               url: true,
             }
           },
           images: {
             select: {
+              id:true,
               url:true
             }
           },
           location: {
             select: {
+              id:true,
               name: true,
               municipality: {
                 select: {
+                  id:true,
                   name: true,
                   district: {
                     select: {
+                      id:true,
                       name: true,
                     },
                   },
@@ -578,6 +583,7 @@ export async function getAllProperties(req: Request, res: Response) {
           },
           category: {
             select: {
+              id:true,
               name: true,
             },
           },
