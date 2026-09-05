@@ -57,30 +57,36 @@ export async function getMobileListing(req: Request, res: Response) {
 
         images: {
           select: {
+            id: true,
             url: true,
           },
         },
 
         coverImage: {
           select: {
+            id: true,
             url: true,
           },
         },
 
         category: {
           select: {
+            id: true,
             name: true,
           },
         },
 
         location: {
           select: {
+            id: true,
             name: true,
             municipality: {
               select: {
+                id: true,
                 name: true,
                 district: {
                   select: {
+                    id: true,
                     name: true,
                   },
                 },
