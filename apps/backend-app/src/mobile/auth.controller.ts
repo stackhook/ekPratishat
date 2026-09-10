@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { authenticateUser } from "../services/auth.services.js";
 import { generateToken, verifyToken } from "../utils/jwt.js";
 import { AppError } from "@repo/functions";
+import { prisma } from "@repo/database";
 
 export async function mobileAuthController(req: Request, res: Response) {
   const result = userSigninSchema.safeParse(req.body);
@@ -43,7 +44,6 @@ export async function mobileAuthController(req: Request, res: Response) {
 }
 
 export async function getMyInfo(req: Request, res: Response) {
-  console.log("getMyInfo called");
   let token: string | undefined;
 
   const authHeader = req.headers.authorization;
@@ -65,12 +65,29 @@ export async function getMyInfo(req: Request, res: Response) {
 
   try {
     const decodedToken = verifyToken(token);
+
+    const user = await prisma.user.findUnique({
+      where: { id: decodedToken.userId, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        profileImageUrl: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(200).json({
+        user: null,
+      });
+    }
+
     return res.status(200).json({
       user: {
-        id: decodedToken.userId,
-        name: decodedToken.name,
-        role: decodedToken.role,
-        profileImageUrl: decodedToken.profileImageUrl,
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        profileImageUrl: user.profileImageUrl,
       },
     });
   } catch (error) {

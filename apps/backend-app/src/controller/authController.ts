@@ -6,6 +6,10 @@ import { generateToken, verifyToken } from "../utils/jwt.js";
 import { AppError, createUser } from "@repo/functions";
 import { triggerFrontendUpdate } from "../utils/revalidator.js";
 import { authenticateUser } from "../services/auth.services.js";
+import { promises as fs } from "fs";
+import fsSync from "fs";
+import path from "path";
+import sharp from "sharp";
 
 interface CreateDesignationBody {
   title: string;
@@ -13,6 +17,8 @@ interface CreateDesignationBody {
   permissionIds: string[];
   multipleAssignment: boolean;
 }
+
+const IMAGE_DIR = "/var/www/ekPratisatMonorepo/images/profileImage";
 
 export const signIn = async (req: Request, res: Response) => {
   try {
@@ -104,7 +110,7 @@ export const signIn = async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    if(err instanceof AppError) {
+    if (err instanceof AppError) {
       return res.status(err.status).json({
         error: err.message,
         fieldErrors: err.fieldErrors || null,
@@ -590,13 +596,13 @@ export const updateDesignation = async (req: Request, res: Response) => {
       await tx.auditLog.create({
         data: {
           actorType: user.role,
-          actorId:user.id,
+          actorId: user.id,
           actorName: user.name,
           action: "UPDATE",
           entityType: "Designation",
           entityId: designation.id,
-        }
-      })
+        },
+      });
     });
 
     return res.status(200).json({
@@ -621,3 +627,154 @@ export const updateDesignation = async (req: Request, res: Response) => {
     }
   }
 };
+
+//my-profile
+
+export const  getMyProfile = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+
+    const myProfile = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        name: true,
+        contact: true,
+        email: true,
+        profileImageUrl: true,
+      },
+    });
+
+    if (!myProfile) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(myProfile);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+//change profile image
+export async function updateProfileImage(req: Request, res: Response) {
+  const user = req.user;
+  const file = req.file
+    ? {
+        fieldname: req.file.fieldname,
+        buffer: req.file.buffer,
+        mimetype: req.file.mimetype,
+        originalname: req.file.originalname,
+        size: req.file.size,
+      }
+    : null;
+
+
+
+  let imageUrl = "";
+  let absoluteUploadedPath = "";
+
+  try {
+    const userInfo = await prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!userInfo) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (file){
+      const filename = `${Date.now()}-${file.originalname}`;
+      const outputFormat = "webp";
+      const cleanFilename = filename.replace(
+        path.extname(filename),
+        `.${outputFormat}`,
+      );
+  
+      absoluteUploadedPath = path.join(IMAGE_DIR, cleanFilename);
+  
+      const optimizedBuffer = await sharp(file.buffer)
+        .resize(1200)
+        .toFormat(outputFormat, { quality: 100 })
+        .toBuffer();
+  
+      // Non-blocking async file system write
+      await fs.writeFile(absoluteUploadedPath, optimizedBuffer);
+      imageUrl = `/image/profileImage/${cleanFilename}`;
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userInfo.id },
+      data: { profileImageUrl: imageUrl ? imageUrl : null },
+    });
+
+    if (userInfo.profileImageUrl) {
+      const oldAbsoluteFilePath = path.join(
+        IMAGE_DIR,
+        path.basename(userInfo.profileImageUrl),
+      );
+      if (fsSync.existsSync(oldAbsoluteFilePath)) {
+        await fs
+          .unlink(oldAbsoluteFilePath)
+          .catch((err) => console.error("Failed to delete legacy file:", err));
+      }
+    }
+
+    return res.status(200).json({
+      message: "Profile image updated successfully",
+      profileImageUrl: updatedUser.profileImageUrl,
+    });
+  } catch (error) {
+    if (absoluteUploadedPath && fsSync.existsSync(absoluteUploadedPath)) {
+      try {
+        fsSync.unlinkSync(absoluteUploadedPath);
+      } catch (e) {
+        console.error("Failed to remove orphaned file in rollback step:", e);
+      }
+    }
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+}
+
+//change password via old password
+
+export async function changePassword(req: Request, res: Response) {
+  const user = req.user;
+  const { oldPassword, newPassword } = req.body;
+  console.log("oldpaasswrod", oldPassword, "newpassword", newPassword);
+
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ message: "Old and new passwords are required" });
+  }
+
+  try {
+    const userInfo = await prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!userInfo) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isOldPasswordValid = await comparePassword(oldPassword, userInfo.password);
+    if (!isOldPasswordValid) {
+      return res.status(403).json({ message: "Old password is incorrect" });
+    };
+    
+    const hashedNewPassword = await hashPassword(newPassword);
+
+    await prisma.user.update({
+      where: { id: userInfo.id },
+      data: { password: hashedNewPassword },
+    });
+
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+} 
+    

@@ -647,6 +647,7 @@ export async function updateProperty(req: Request, res: Response) {
       deleteImageIds = [];
     }
 
+    console.log("Print ImageIds", deleteImageIds);
     const parsed = {
       ...normalized,
       lat: normalized.lat ? Number(normalized.lat) : null,
