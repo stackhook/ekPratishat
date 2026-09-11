@@ -19,7 +19,7 @@ type ErrorType = {
     password?: string;
 };
 
-export default function SignupForm() {
+export default function SignupForm({ isMobileSignup }: { isMobileSignup: boolean }) {
     const [form, setForm] = useState<UserSingUpSchema>({
         name: "",
         contact: "",
@@ -27,6 +27,7 @@ export default function SignupForm() {
         password: ""
     });
     const router = useRouter();
+
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<ErrorType>({});
     const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -34,7 +35,7 @@ export default function SignupForm() {
     const [step, setStep] = useState<number>(1);
     const queryClient = useQueryClient();
 
-    const signupMutation = useCreateClientUser();
+    const signupMutation = useCreateClientUser(isMobileSignup);
 
     // refs for each input
     const nameRef = useRef<HTMLInputElement>(null);
@@ -65,20 +66,20 @@ export default function SignupForm() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if(!form.name.trim()){
-            setError({name: "Please input a valid name."})
+        if (!form.name.trim()) {
+            setError({ name: "Please input a valid name." })
             setStep(1);
             return;
-        }else if(!form.contact.trim()){
-            setError({contact: "Please input a valid contact."})
+        } else if (!form.contact.trim()) {
+            setError({ contact: "Please input a valid contact." })
             setStep(1);
             return;
-        }else if(!form.email.trim()){
-            setError({email: "Please input a valid email."})
+        } else if (!form.email.trim()) {
+            setError({ email: "Please input a valid email." })
             setStep(1);
             return;
-        }else if(!form.password.trim()){
-            setError({password: "Password field cannot be empty."})
+        } else if (!form.password.trim()) {
+            setError({ password: "Password field cannot be empty." })
             setStep(1);
             return;
         }
@@ -90,13 +91,18 @@ export default function SignupForm() {
         formData.append("email", form.email.trim());
         if (profileImage) formData.append("profileImage", profileImage);
 
-        console.log(formData);
-        
+
         signupMutation.mutate(formData, {
-            onSuccess: (data) => {
+            onSuccess: () => {
+                if (isMobileSignup) {
+                    // Return to the mobile application
+                    window.location.href = "/auth/mobile-signup-success"; // Redirect to a success page or handle as needed 
+                    return;
+                }
+
                 toast.success("Signup and Logged in Successfully!!!");
                 queryClient.invalidateQueries({
-                    queryKey:["user-info"]
+                    queryKey: ["user-info"]
                 })
                 router.replace("/");
             },
@@ -276,7 +282,7 @@ export default function SignupForm() {
                         <div className="h-20"></div>
                         <div className="flex justify-between">
                             <Button type="button" onClick={() => setStep(1)} variant="outline">← Back</Button>
-                            <Button type="submit" variant="default"  disabled={signupMutation.isPending}>
+                            <Button type="submit" variant="default" disabled={signupMutation.isPending}>
                                 {signupMutation.isPending ? <AnimateLoader /> : "Complete Signup"}
                             </Button>
                         </div>

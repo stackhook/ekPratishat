@@ -50,10 +50,10 @@ export const useCreateUser = () => {
   });
 };
 
-export const useCreateClientUser = () => {
+export const useCreateClientUser = (isMobileSignUp: boolean) => {
   return useMutation<any,ErrorType,FormData>({
     mutationFn: async (formData: FormData) => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/create-user`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/create-user?isMobileSignup=${isMobileSignUp}`, {
         method: "POST",
         credentials: "include",
         body: formData,

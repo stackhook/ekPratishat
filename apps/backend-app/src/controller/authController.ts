@@ -28,46 +28,6 @@ export const signIn = async (req: Request, res: Response) => {
     }
     const { contact, password } = result.data;
 
-    // const user = await prisma.user.findUnique({
-    //   where: {
-    //     contact,
-    //   },
-    //   include: {
-    //     designation: {
-    //       include: {
-    //         permissions: {
-    //           include: {
-    //             permission: true,
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    // });
-
-    // if (!user || !(await comparePassword(password, user.password))) {
-    //   return res.status(401).json({ error: "Invalid credentials" });
-    // }
-
-    // if (!user.isActive) {
-    //   return res
-    //     .status(403)
-    //     .json({ error: "Account is deactivated. Please contact support." });
-    // }
-    // if (user.role === "partner" || user.role === "staff") {
-    //   if (!user.isVerified) {
-    //     return res
-    //       .status(403)
-    //       .json({ error: "Pending account verification!!!" });
-    //   }
-    // }
-
-    // if (user.role === "staff" && !user.designationId) {
-    //   return res.status(403).json({
-    //     error: "You are not yet permitted!!!",
-    //   });
-    // }
-
     const user = await authenticateUser({ contact, password });
 
     let compactPermissions: string[] = [];
@@ -123,7 +83,10 @@ export const signIn = async (req: Request, res: Response) => {
 };
 
 export const createClientUser = async (req: Request, res: Response) => {
+  console.log("createClientUser called with query:", req.query);
   try {
+    const isMobileSignup = req.query.isMobileSignup === "true" ? true : false;
+
     const adaptedFiles = (req.files as Express.Multer.File[]).map((file) => ({
       fieldname: file.fieldname,
       buffer: file.buffer,
@@ -137,25 +100,27 @@ export const createClientUser = async (req: Request, res: Response) => {
       files: adaptedFiles,
     });
 
-    const token = generateToken({
-      userId: result.user.id,
-      role: result.user.role,
-      name: result.user.name,
-      profileImageUrl: result.user.profileImageUrl,
-    });
+    if(!isMobileSignup){
+      const token = generateToken({
+        userId: result.user.id,
+        role: result.user.role,
+        name: result.user.name,
+        profileImageUrl: result.user.profileImageUrl,
+      });
+  
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 30 * 60 * 60 * 1000,
+        path: "/", // cookie available for entire domain
+        domain:
+          process.env.NODE_ENV === "production"
+            ? ".ekpratishat.com"
+            : "localhost",
+      });
 
-    res.cookie("accessToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 24 * 30 * 60 * 60 * 1000,
-      path: "/", // cookie available for entire domain
-      domain:
-        process.env.NODE_ENV === "production"
-          ? ".ekpratishat.com"
-          : "localhost",
-    });
-
+    }
     return res.status(201).json({
       ok: true,
       result,
