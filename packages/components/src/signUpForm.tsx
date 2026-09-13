@@ -96,7 +96,7 @@ export default function SignupForm({ isMobileSignup }: { isMobileSignup: boolean
             onSuccess: () => {
                 if (isMobileSignup) {
                     // Return to the mobile application
-                    window.location.href = "https://ekpratishat.com/auth/mobile-signup-success"; // Redirect to a success page or handle as needed 
+                    window.location.href = "https://ekpratishat.com/auth/mobile-signup-success";
                     return;
                 }
 
