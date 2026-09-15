@@ -261,6 +261,24 @@ export const getUserListings = async (req: Request, res: Response) => {
               url: true,
             },
           },
+          location: {
+            select: {
+              id:true,
+              name: true,
+              municipality: {
+                select: {
+                  id:true,
+                  name: true,
+                  district: {
+                    select: {
+                      id:true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           category: {
             select: {
               id:true,
@@ -746,14 +764,14 @@ export async function deactivateListing(req: Request, res: Response) {
       });
     });
 
-    // if (result.verified) {
-    //   triggerFrontendUpdate("properties");
-    // }
+    if (result.verified) {
+      triggerFrontendUpdate({tag : "properties"});
+    }
 
-    // await Promise.allSettled([
-    //   triggerFrontendUpdate(`listings-${result.userId}`),
-    //   triggerFrontendUpdate("favourite"),
-    // ]);
+    await Promise.allSettled([
+      triggerFrontendUpdate({tag: `listings-${result.userId}`}),
+      triggerFrontendUpdate({tag: "favourite"}),
+    ]);
 
     res.status(200).json({
       message: "Property Deleted Successfully!!!",
