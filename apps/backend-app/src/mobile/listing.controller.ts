@@ -140,7 +140,7 @@ export const fetchFavourites = async (req: Request, res: Response) => {
     const user = req.user;
     const { page = 1, pageSize = 10 } = req.query;
 
-     if (Number(page) <= 0 || Number(pageSize) <= 0) {
+    if (Number(page) <= 0 || Number(pageSize) <= 0) {
       return res.status(400).json({
         message: "Page and pageSize must be positive integers",
       });
@@ -152,45 +152,63 @@ export const fetchFavourites = async (req: Request, res: Response) => {
           userId: user?.id,
         },
       }),
-      
-     prisma.favourite.findMany({
-      where: {
-        userId: user?.id,
-      },
-      select: {
-        property: {
-          select: {
-            id: true,
-            title: true,
-            price: true,
-            type: true,
-            tole: true,
-            propertyCode: true,
-            isFeatured: true,
-            verified: true,
-            coverImage: {
-              select: {
-                id:true,
-                url: true,
+
+      prisma.favourite.findMany({
+        where: {
+          userId: user?.id,
+        },
+        select: {
+          property: {
+            select: {
+              id: true,
+              title: true,
+              price: true,
+              type: true,
+              tole: true,
+              propertyCode: true,
+              isFeatured: true,
+              verified: true,
+              coverImage: {
+                select: {
+                  id: true,
+                  url: true,
+                },
               },
-            },
-            images: {
-              select: {
-                id:true,
-                url: true,
+              location: {
+                select: {
+                  id: true,
+                  name: true,
+                  municipality: {
+                    select: {
+                      id: true,
+                      name: true,
+                      district: {
+                        select: {
+                          id: true,
+                          name: true,
+                        },
+                      },
+                    },
+                  },
+                },
               },
-            },
-            category: {
-              select: {
-                id:true,
-                name: true,
+              images: {
+                select: {
+                  id: true,
+                  url: true,
+                },
               },
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              createdAt: true,
             },
-            createdAt: true,
           },
         },
-      },
-    })
+      }),
     ]);
 
     const properties = result.map((favourite) => favourite.property);
@@ -202,7 +220,7 @@ export const fetchFavourites = async (req: Request, res: Response) => {
         page: Number(page),
         pageSize: Number(pageSize),
         totalPages: Math.max(1, Math.ceil(total / Number(pageSize))),
-      }
+      },
     });
   } catch (error) {
     return res.status(500).json({
