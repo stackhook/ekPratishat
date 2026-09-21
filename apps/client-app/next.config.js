@@ -5,15 +5,11 @@ const nextConfig = {
   ...baseConfig,
   reactStrictMode: true,
    images: {
+    domains: ['localhost','www.ekpratishat.com', 'images.unsplash.com'], // add your file server host
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: '10.0.2.2',
-        pathname: '/**',
-      },
-      {
-        protocol: 'http',
-        hostname: '192.168.0.103',
+        hostname: 'localhost',
         pathname: '/**',
       },
       {
