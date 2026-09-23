@@ -1,6 +1,6 @@
 "use client";
 
-import { useCheckFavourite, useToggleFavourite, useUser } from "@repo/query-hook";
+import { useCheckFavourite, useGetUserInfo, useToggleFavourite } from "@repo/query-hook";
 import { PropertyDetailClientProps } from "./PropertyDetailClient";
 // Assuming these are your icon imports - adjust names if necessary
 import { Heart as HeartIcon } from "lucide-react"; 
@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { revalidateTagPathAction } from "../../actions/revalidateAction";
 
 export default function FavouriteButton({ property }: PropertyDetailClientProps) {
-    const { data: user, isLoading: userLoading } = useUser();
+    const { data: user, isLoading: userLoading } = useGetUserInfo();
     const queryClient = useQueryClient();
     // This query is 'enabled' only if user exists, 
     // so favouriteLoading will stay false/idle for guests.

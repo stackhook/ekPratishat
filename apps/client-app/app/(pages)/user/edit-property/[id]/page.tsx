@@ -1,7 +1,7 @@
 "use client";
 
 import { AddPropertyForm } from "@repo/components/addPropertyForm";
-import { useEditProperty, useFetchPropertyDetail, useUser } from "@repo/query-hook";
+import { useEditProperty, useFetchPropertyDetail, useGetUserInfo } from "@repo/query-hook";
 import PageLoading from "@repo/ui/pageloading";
 import { PropertyFormdata } from "@repo/validators";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,7 +32,7 @@ export default function EditPropertyPage() {
         isError,
         error,
     } = useFetchPropertyDetail(params.id as string);
-    const { data: user, isLoading: userLoading } = useUser();
+    const { data: user, isLoading: userLoading } = useGetUserInfo();
 
     useEffect(() => {
         setIsMounted(true);

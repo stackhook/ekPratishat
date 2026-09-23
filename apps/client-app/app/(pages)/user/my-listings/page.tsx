@@ -40,7 +40,10 @@ export default async function MyListingPage({
 
 
     // 3. Check for specific status codes (like 401/403)
-    if (res.status === 401) redirect("/auth/signin");
+    if (res.status === 401) {
+        console.log("Unauthorized access. Redirecting to signin.");
+        redirect("/auth/signin");
+    }
 
     if (!res.ok) {
         // This is where you return the "Failed" UI instead of throwing

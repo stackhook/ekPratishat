@@ -43,6 +43,9 @@ export default function SignInForm({ label }: SignInProps) {
           queryClient.invalidateQueries({
             queryKey: ["user-info"],
           });
+          queryClient.invalidateQueries({
+            queryKey: ["my-information"],
+          });
           router.replace("/");
         } else if (data?.error) {
           toast.error(data.error || "Something Happened");

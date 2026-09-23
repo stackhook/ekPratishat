@@ -25,6 +25,7 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
         role: payload.role,
         name: payload.name,
         perms: payload?.perms || [],
+        sessionId: payload.sessionId,
       };
 
       return next();

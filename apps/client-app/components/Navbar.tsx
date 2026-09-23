@@ -16,7 +16,7 @@ import { ToggleTheme } from "@repo/components/toggleTheme";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useUser } from "@repo/query-hook";
+import { useClientLogOut, useGetUserInfo } from "@repo/query-hook";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import ScrollLogoTransition from "./hero/ScrollLogoTransition";
@@ -86,7 +86,8 @@ const Navbar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: user, isLoading } = useUser();
+  const { data: user, isLoading } = useGetUserInfo();
+  const {mutate,isPending} = useClientLogOut();
   const { mode, isMounted: isHeroPerformanceMounted } = useHeroPerformanceMode();
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   /**
@@ -490,25 +491,13 @@ const Navbar = () => {
   }, [homeLogoOwner, isHomePage, shouldUseScrollLogo]);
 
   const handleLogout = async () => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signout`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        toast.error("Logout failed");
-        return;
+    mutate(undefined, {
+      onSuccess: (data) => {
+        toast.success(data.message || "Logout Successfully");
+        queryClient.clear();
+        router.replace("/");
       }
-
-      queryClient.clear();
-      toast.success("Logged out");
-      setIsOpen(false);
-      setIsAccountOpen(false);
-      router.replace("/");
-    } catch {
-      toast.error("Logout failed");
-    }
+    })
   };
 
   return (
@@ -664,9 +653,10 @@ const Navbar = () => {
                         type="button"
                         className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 focus:outline-none focus-visible:bg-red-50 dark:text-red-200 dark:hover:bg-red-500/10"
                         onClick={handleLogout}
+                        disabled = {isPending}
                       >
                         <LogOut className="h-4 w-4" aria-hidden="true" />
-                        Logout
+                        {isPending ? "Logging Out" : "LogOut"}
                       </button>
                     </div>
                   </div>

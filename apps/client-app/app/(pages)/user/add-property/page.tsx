@@ -1,7 +1,7 @@
 "use client";
 import { AddPropertyForm } from "@repo/components/addPropertyForm";
 import { AddPropertySkeleton } from "@repo/components/addPropertySkeleton";
-import { useCreateProperty, useUser } from "@repo/query-hook";
+import { useCreateProperty, useGetUserInfo } from "@repo/query-hook";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, LockKeyhole } from "lucide-react";
@@ -39,7 +39,7 @@ import { revalidateTagPathAction } from "../../../../actions/revalidateAction";
 
 
 export default function AddProperty() {
-  const { data: user, isLoading } = useUser();
+  const { data: user, isLoading } = useGetUserInfo();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { mutate, isPending } = useCreateProperty();

@@ -2,7 +2,12 @@ import { DatabaseError, handlePrismaError, prisma } from "@repo/database";
 import { userSigninSchema, userSignupSchema } from "@repo/validators";
 import { Request, Response } from "express";
 import { comparePassword, hashPassword } from "../utils/hash.js";
-import { generateToken, verifyToken } from "../utils/jwt.js";
+import {
+  generateRefreshToken,
+  generateToken,
+  hashRefreshToken,
+  verifyToken,
+} from "../utils/jwt.js";
 import { AppError, createUser } from "@repo/functions";
 import { triggerFrontendUpdate } from "../utils/revalidator.js";
 import { authenticateUser } from "../services/auth.services.js";
@@ -10,6 +15,8 @@ import { promises as fs } from "fs";
 import fsSync from "fs";
 import path from "path";
 import sharp from "sharp";
+import { refreshSession } from "../services/refresh.auth.service.js";
+import { clearAuthCookies } from "../utils/clear.auth.cookies.js";
 
 interface CreateDesignationBody {
   title: string;
@@ -28,7 +35,15 @@ export const signIn = async (req: Request, res: Response) => {
     }
     const { contact, password } = result.data;
 
-    const user = await authenticateUser({ contact, password });
+    const userAgent = req.get("user-agent") ?? undefined;
+    const ipAddress = req.ip ?? undefined;
+
+    const user = await authenticateUser({
+      contact,
+      password,
+      userAgent,
+      ipAddress,
+    });
 
     let compactPermissions: string[] = [];
     if (user.role === "staff" && user.designation) {
@@ -44,15 +59,44 @@ export const signIn = async (req: Request, res: Response) => {
       name: user.name,
       profileImageUrl: user.profileImageUrl,
       ...(user.role === "staff" && { perms: compactPermissions }),
+      sessionId: user.sessionId,
     });
 
     res.cookie("accessToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge:
-        user.role !== "client" ? 24 * 60 * 60 * 1000 : 24 * 30 * 60 * 60 * 1000,
+      maxAge: 1 * 60 * 1000, // 15 minutes
       path: "/", // cookie available for entire domain
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+
+    res.cookie("sessionPresent", "1", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge:  user.role !== "client"
+          ? 30 * 1000
+          : 30 * 24 * 60 * 60 * 1000,
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+
+    res.cookie("refreshToken", user.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge:
+        user.role === "admin" || user.role === "staff"
+          ? 30 * 1000
+          : 30 * 24 * 60 * 60 * 1000,
+      path: "/auth/refresh",
       domain:
         process.env.NODE_ENV === "production"
           ? ".ekpratishat.com"
@@ -83,7 +127,6 @@ export const signIn = async (req: Request, res: Response) => {
 };
 
 export const createClientUser = async (req: Request, res: Response) => {
-  console.log("createClientUser called with query:", req.query);
   try {
     const isMobileSignup = req.query.isMobileSignup === "true" ? true : false;
 
@@ -100,27 +143,27 @@ export const createClientUser = async (req: Request, res: Response) => {
       files: adaptedFiles,
     });
 
-    if(!isMobileSignup){
-      const token = generateToken({
-        userId: result.user.id,
-        role: result.user.role,
-        name: result.user.name,
-        profileImageUrl: result.user.profileImageUrl,
-      });
-  
-      res.cookie("accessToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 30 * 60 * 60 * 1000,
-        path: "/", // cookie available for entire domain
-        domain:
-          process.env.NODE_ENV === "production"
-            ? ".ekpratishat.com"
-            : "localhost",
-      });
+    // if (!isMobileSignup) {
+    //   const token = generateToken({
+    //     sessionId: "aa",
+    //     userId: result.user.id,
+    //     role: result.user.role,
+    //     name: result.user.name,
+    //     profileImageUrl: result.user.profileImageUrl,
+    //   });
 
-    }
+    //   res.cookie("accessToken", token, {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === "production",
+    //     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //     maxAge: 24 * 30 * 60 * 60 * 1000,
+    //     path: "/", // cookie available for entire domain
+    //     domain:
+    //       process.env.NODE_ENV === "production"
+    //         ? ".ekpratishat.com"
+    //         : "localhost",
+    //   });
+    // }
     return res.status(201).json({
       ok: true,
       result,
@@ -232,48 +275,72 @@ export const verifyAgent = async (req: Request, res: Response) => {
   }
 };
 
-export const signOut = (req: Request, res: Response) => {
-  res.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/",
-    domain:
-      process.env.NODE_ENV === "production" ? ".ekpratishat.com" : "localhost",
-  });
+export const signOut = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    await prisma.session.update({
+      where: { id: user.sessionId },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
 
-  return res.status(200).json({
-    ok: true,
-    message: "Logged Out!!!",
-  });
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/auth/refresh",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+
+    res.clearCookie("sessionPresent", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+
+    return res.status(200).json({
+      ok: true,
+      message: "Logged Out!!!",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
 };
 
 export const myInfo = async (req: Request, res: Response) => {
-  let token: string | undefined;
-
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer")) {
-    token = authHeader.split(" ")[1];
-  }
-
-  if (!token && req.cookies?.accessToken) {
-    token = req.cookies.accessToken;
-  }
-
-  // Instead of 401, we return 200 with ok: false or user: null
-  if (!token) {
-    return res.status(200).json({
-      ok: false,
-      user: null,
-      message: "Guest session",
-    });
-  }
-
   try {
-    const payload = verifyToken(token);
+    const user = req.user;
+
+    if (!user) {
+      return res.status(200).json({
+        user: null,
+      });
+    }
 
     const checkUser = await prisma.user.findUnique({
-      where: { id: payload.userId, isActive: true },
+      where: { id: user.id, isActive: true },
       select: {
         id: true,
         name: true,
@@ -294,21 +361,9 @@ export const myInfo = async (req: Request, res: Response) => {
         },
       },
     });
-    if (!checkUser || !checkUser.isActive) {
-      res.clearCookie("accessToken", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        path: "/",
-        domain:
-          process.env.NODE_ENV === "production"
-            ? ".ekpratishat.com"
-            : "localhost",
-      });
-      return res.status(200).json({
-        user: null,
-        ok: false,
-        message: "Account deactivated",
+    if (!checkUser) {
+      return res.status(401).json({
+        message: "User not found",
       });
     }
     return res.status(200).json({
@@ -323,12 +378,8 @@ export const myInfo = async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    // If the token is invalid/expired, we still send 200 but null the user
-    // This forces the frontend to clear any old 'Admin' UI
-    return res.status(200).json({
-      ok: false,
-      user: null,
-      message: "Session expired",
+    return res.status(500).json({
+      message: "Internal Server Error",
     });
   }
 };
@@ -368,6 +419,13 @@ export const toggleActive = async (req: Request, res: Response) => {
                 },
               },
             },
+          },
+        }),
+
+        prisma.session.updateMany({
+          where: { userId: agentId, revokedAt: null },
+          data: {
+            revokedAt: new Date(),
           },
         }),
       ]);
@@ -595,7 +653,7 @@ export const updateDesignation = async (req: Request, res: Response) => {
 
 //my-profile
 
-export const  getMyProfile = async (req: Request, res: Response) => {
+export const getMyProfile = async (req: Request, res: Response) => {
   try {
     const user = req.user;
 
@@ -634,8 +692,6 @@ export async function updateProfileImage(req: Request, res: Response) {
       }
     : null;
 
-
-
   let imageUrl = "";
   let absoluteUploadedPath = "";
 
@@ -648,21 +704,21 @@ export async function updateProfileImage(req: Request, res: Response) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (file){
+    if (file) {
       const filename = `${Date.now()}-${file.originalname}`;
       const outputFormat = "webp";
       const cleanFilename = filename.replace(
         path.extname(filename),
         `.${outputFormat}`,
       );
-  
+
       absoluteUploadedPath = path.join(IMAGE_DIR, cleanFilename);
-  
+
       const optimizedBuffer = await sharp(file.buffer)
         .resize(1200)
         .toFormat(outputFormat, { quality: 100 })
         .toBuffer();
-  
+
       // Non-blocking async file system write
       await fs.writeFile(absoluteUploadedPath, optimizedBuffer);
       imageUrl = `/image/profileImage/${cleanFilename}`;
@@ -708,10 +764,11 @@ export async function updateProfileImage(req: Request, res: Response) {
 export async function changePassword(req: Request, res: Response) {
   const user = req.user;
   const { oldPassword, newPassword } = req.body;
-  console.log("oldpaasswrod", oldPassword, "newpassword", newPassword);
 
   if (!oldPassword || !newPassword) {
-    return res.status(400).json({ message: "Old and new passwords are required" });
+    return res
+      .status(400)
+      .json({ message: "Old and new passwords are required" });
   }
 
   try {
@@ -723,16 +780,29 @@ export async function changePassword(req: Request, res: Response) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const isOldPasswordValid = await comparePassword(oldPassword, userInfo.password);
+    const isOldPasswordValid = await comparePassword(
+      oldPassword,
+      userInfo.password,
+    );
     if (!isOldPasswordValid) {
       return res.status(403).json({ message: "Old password is incorrect" });
-    };
-    
+    }
+
     const hashedNewPassword = await hashPassword(newPassword);
 
     await prisma.user.update({
       where: { id: userInfo.id },
       data: { password: hashedNewPassword },
+    });
+
+    await prisma.session.updateMany({
+      where: {
+        userId: user.id,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
     });
 
     return res.status(200).json({ message: "Password changed successfully" });
@@ -741,5 +811,115 @@ export async function changePassword(req: Request, res: Response) {
       message: "Internal Server Error",
     });
   }
-} 
-    
+}
+
+export async function refreshAccessToken(req: Request, res: Response) {
+  const isMobile = req.query.isMobile === "true";
+
+  try {
+    const refreshToken = isMobile
+      ? req.body?.refreshToken
+      : req.cookies?.refreshToken;
+
+    console.log("Refresh TOken, refresh", refreshToken);
+
+    if (!refreshToken) {
+      throw new AppError(401, "Refresh token missing!!!");
+    }
+    const result = await refreshSession(refreshToken);
+
+    if (isMobile) {
+      return res.status(200).json({
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
+    }
+
+    res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1 * 60 * 1000, // 15 minutes
+      path: "/", // cookie available for entire domain
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge:
+        result.user.role !== "client"
+          ? 2 * 60 * 60 * 1000
+          : 30 * 24 * 60 * 60 * 1000,
+      path: "/auth/refresh",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+    res.cookie("sessionPresent", "1", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge:
+        result.user.role !== "client"
+          ? 2 * 60 * 60 * 1000
+          : 30 * 24 * 60 * 60 * 1000,
+      path: "/",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? ".ekpratishat.com"
+          : "localhost",
+    });
+
+    return res.status(200).json({
+      ok: true,
+      message: "Access token refreshed successfully",
+    });
+  } catch (error) {
+    if (!isMobile) {
+      console.log("Clearing cookies due to refresh token failure.");
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+        domain:
+          process.env.NODE_ENV === "production"
+            ? ".ekpratishat.com"
+            : "localhost",
+      });
+
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/auth/refresh",
+        domain:
+          process.env.NODE_ENV === "production"
+            ? ".ekpratishat.com"
+            : "localhost",
+      });
+      res.clearCookie("sessionPresent", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+        domain:
+          process.env.NODE_ENV === "production"
+            ? ".ekpratishat.com"
+            : "localhost",
+      });
+    }
+    if (error instanceof AppError) {
+      return res.status(error.status).json({ message: error.message });
+    }
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+}

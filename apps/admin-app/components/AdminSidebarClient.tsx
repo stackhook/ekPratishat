@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { SidebarDropdownSection } from "@repo/ui/sideBarDropdownSection";
 import { toast } from "sonner";
-import { useUser } from "@repo/query-hook";
+import { useLogOut, useUser } from "@repo/query-hook";
 import { useQueryClient } from "@tanstack/react-query";
 
 const navSections = [
@@ -27,6 +27,7 @@ export default function AdminSidebarClient() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
+  const {mutate,isPending} = useLogOut();
 
   useEffect(() => {
     setMounted(true);
@@ -163,22 +164,18 @@ export default function AdminSidebarClient() {
         <div className="mt-auto flex flex-col space-y-3 text-sm">
           <button
             onClick={async () => {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signout`, {
-                method: "POST",
-                credentials: "include",
-              });
-              const data = await res.json();
-              if (!res.ok) {
-                toast.error(data.message || "Failed to log out");
-                return;
-              }
-              queryClient.clear();
-              toast.success(data.message || "Logged out successfully");
-              router.replace("/auth/signin");
+              mutate(undefined, {
+                onSuccess: () => {
+                  queryClient.clear();
+                  toast.success("Successfully Logout!!!");
+                  router.replace("/auth/signin");
+
+                }
+              })
             }}
             className="px-4 py-2 rounded-lg border border-gray-400 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-700 transition-all duration-200"
           >
-            Log Out
+            { isPending ? "Logging Out" : "LogOut"}
           </button>
 
         </div>

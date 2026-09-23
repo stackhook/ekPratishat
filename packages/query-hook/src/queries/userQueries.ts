@@ -1,5 +1,5 @@
 import { getAgentDetailAction, getAgentListAction } from "@repo/actions";
-import { authenticatedFetch } from "@repo/shared-provider";
+import { authenticatedFetch, optionalAuthFetch } from "@repo/shared-provider";
 import { useQuery } from "@tanstack/react-query";
 
 interface UserProps {
@@ -50,25 +50,33 @@ export const useUser = () => {
   return useQuery({
     queryKey: ["user-info"],
     queryFn: async () => {
-      const res = await fetch(
+      const res = await authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/my-info`,
-        { credentials: "include" },
       );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.error || "Failed to fetch info");
-      }
-
-      return data.user;
+      return res.user;
     },
     retry: 1,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 1 * 60 * 1000,
     refetchInterval: 2 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
 };
+
+export const useGetUserInfo = () => {
+  return useQuery({
+    queryKey: ["my-information"],
+    queryFn: async () => {
+      const res = await optionalAuthFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/my-info-optional`,
+      );
+      console.log("res", res);
+      return res.user;
+    },
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 15 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  });
+}
 
 export const useCheckFavourite = ({
   propertyId,

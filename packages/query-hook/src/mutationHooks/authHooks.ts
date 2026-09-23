@@ -1,5 +1,5 @@
 // @repo/query-hook/src/hooks/useCreateUser.ts
-import { authenticatedFetch } from "@repo/shared-provider";
+import { authenticatedFetch, optionalAuthFetch } from "@repo/shared-provider";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -96,6 +96,38 @@ export const useSignInUser = () => {
     },
   });
 };
+
+export const useLogOut = () => {
+  return useMutation({
+    mutationFn: async() => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signout`,
+        {
+          method:"POST"
+        }
+      )
+    },
+    onError: (error) => {
+      toast.error(error.message || "Unexpected Error");
+    },
+  })
+}
+
+export const useClientLogOut = () => {
+  return useMutation({
+    mutationFn: async() => {
+      return optionalAuthFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signout`,
+        {
+          method:"POST"
+        }
+      )
+    },
+     onError: (error) => {
+      toast.error(error.message || "Unexpected Error");
+    },
+  })
+}
 
 
 export const useCreateDesignation = () => {
