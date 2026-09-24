@@ -1,6 +1,6 @@
 import { refreshAccessToken } from "./refresh-auth";
+import { sessionManager } from "./session-manager";
 
-import { queryClient } from "./baseProvider";
 
 const request = async (
   url: string,
@@ -14,20 +14,22 @@ const request = async (
 
   const data = await response.json().catch(() => ({}));
 
-  if (response.status === 401) {
-    if (!isRetry) {
-      const refreshed = await refreshAccessToken();
+  if (response.status === 401 && !isRetry) {
+    const refreshed = await refreshAccessToken();
 
-      if (refreshed) {
-        return request(url, options, true);
-      }
+    if (refreshed) {
+      return request(url, options, true);
     }
+  }
 
-    return {
-      ok: true,
-      user: null,
+  if (response.status === 401) {
+    sessionManager.notifySessionExpired();
+
+    throw {
+      message: "Session expired. Please sign in again.",
     };
   }
+
   if (!response.ok) {
     throw (
       data || {
@@ -39,7 +41,7 @@ const request = async (
   return data;
 };
 
-export const optionalAuthFetch = async (
+export const authenticatedFetch = async (
   url: string,
   options: RequestInit = {},
 ): Promise<any> => {

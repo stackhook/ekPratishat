@@ -64,7 +64,7 @@ listingRouter.put("/mark-verified",checkAuthentication,requireAdmin,verifyListin
 listingRouter.put("/mark-featured",checkAuthentication,requireAdmin,featureListing);
 listingRouter.put("/update-cover/:id", checkAuthentication,checkPermission("properties", "update"),updateCoverImage);
 listingRouter.put("/update-category/:id",checkAuthentication,requireAdmin,uploadUserFiles.single("image"),updateCategory);
-listingRouter.put("/change-handler/:propertyId", checkAuthentication, requireAdmin, changePropertyHandler);
+listingRouter.put("/change-handler/:propertyId", checkAuthentication,requireAdminOrStaff, checkPermission("properties", "update"), changePropertyHandler);
 listingRouter.put("/:id", checkAuthentication, requireAdmin, toggleActivateListing);
 
 listingRouter.get("/categories", getAllCategories);

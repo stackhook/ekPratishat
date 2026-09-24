@@ -56,7 +56,7 @@ export async function authenticateUser({
           refreshTokenHash: refreshTokenHash,
           expiresAt:
             user.role !== "client"
-              ? new Date(Date.now() + 2 * 60 * 60 * 1000)
+              ? new Date(Date.now() + 12 * 60 * 60 * 1000)
               : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           userAgent: userAgent ?? null,
           ipAddress: ipAddress ?? null,

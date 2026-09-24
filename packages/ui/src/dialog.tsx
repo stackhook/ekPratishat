@@ -9,6 +9,7 @@ interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  overlayClassName?: string;
 }
 
 // export function Dialog({ open, onOpenChange, children }: DialogProps) {
@@ -46,7 +47,7 @@ interface DialogProps {
 //   );
 // }
 
-export function Dialog({ open, onOpenChange, children }: DialogProps) {
+export function Dialog({ open, onOpenChange, children, overlayClassName }: DialogProps) {
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -60,7 +61,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
       <>
         {/* background overlay */}
         <motion.div
-          className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px]"
+          className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-[5px]  ${overlayClassName}`}
           onClick={() => onOpenChange(false)}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -94,7 +95,7 @@ export function DialogContent({
   return (
     <div
       className={`relative w-full max-w-lg rounded-2xl border border-[var(--ek-border-soft)] bg-[var(--ek-bg-card)] p-6 text-[var(--ek-text-primary)] shadow-[var(--ek-shadow-card)] dark:border-[var(--ek-dark-border)] dark:bg-[var(--ek-dark-surface)] dark:text-[var(--ek-dark-text)] dark:shadow-[var(--ek-dark-shadow-card)] ${className}`}
-      onClick={(e) => e.stopPropagation() }
+      onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
       {onClose && (
@@ -112,18 +113,34 @@ export function DialogContent({
   );
 }
 
-export function DialogHeader({ children }: { children: React.ReactNode }) {
-  return <div className="mb-3 text-lg font-semibold">{children}</div>;
+export function DialogHeader({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return <div className={`mb-3 text-lg font-semibold ${className}`}>{children}</div>;
 }
 
-export function DialogTitle({ children }: { children: React.ReactNode }) {
+export function DialogTitle({ children, className = "" }: { children: React.ReactNode, className?:string }) {
   return (
-    <h2 className="text-lg font-semibold text-[var(--ek-text-primary)] dark:text-[var(--ek-dark-text)]">
+    <h2 className={`text-lg font-semibold text-[var(--ek-text-primary)] dark:text-[var(--ek-dark-text)] ${className}`}>
       {children}
     </h2>
   );
 }
 
-export function DialogFooter({ children }: { children: React.ReactNode }) {
-  return <div className="mt-5 flex justify-end gap-3">{children}</div>;
+export function DialogFooter({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`mt-5 flex justify-end gap-3 ${className}`}>
+      {children}
+    </div>
+  );
 }

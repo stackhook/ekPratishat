@@ -66,7 +66,7 @@ export const signIn = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000, // 15 minutes
       path: "/", // cookie available for entire domain
       domain:
         process.env.NODE_ENV === "production"
@@ -79,7 +79,7 @@ export const signIn = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:  user.role !== "client"
-          ? 30 * 1000
+          ? 12 * 60 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/",
       domain:
@@ -94,7 +94,7 @@ export const signIn = async (req: Request, res: Response) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:
         user.role === "admin" || user.role === "staff"
-          ? 30 * 1000
+          ? 12 * 60 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/auth/refresh",
       domain:
@@ -839,7 +839,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000, // 15 minutes
       path: "/", // cookie available for entire domain
       domain:
         process.env.NODE_ENV === "production"
@@ -853,7 +853,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:
         result.user.role !== "client"
-          ? 2 * 60 * 60 * 1000
+          ? 12 * 60 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/auth/refresh",
       domain:
@@ -867,7 +867,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:
         result.user.role !== "client"
-          ? 2 * 60 * 60 * 1000
+          ? 12 * 60 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/",
       domain:

@@ -14,7 +14,7 @@ interface TokenPayload{
 
 export const generateToken = ({sessionId, userId, role, name, profileImageUrl,perms }: TokenPayload) => {
     return jwt.sign({ sessionId, userId, role, name, profileImageUrl,perms }, JWT_SECRET , {
-        expiresIn:"1m" 
+        expiresIn:"15m" 
     })
 };
 

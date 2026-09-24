@@ -6,7 +6,7 @@ import { toast } from "sonner"
 export const useVerifyAgent = () => {
     return useMutation({
         mutationFn: async ({userId,isVerified} : {userId:string, isVerified:boolean}) => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-agent`, {
+            return authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-agent`, {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -14,12 +14,6 @@ export const useVerifyAgent = () => {
                 },
                 body: JSON.stringify({ userId, isVerified })
             });
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw data;
-            }
-            return data;
         },
         onError: (error) => {
             toast.error(error.message || "Unexpected Error")

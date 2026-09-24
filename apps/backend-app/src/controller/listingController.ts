@@ -48,7 +48,7 @@ export async function createCategory(req: Request, res: Response) {
       file: adaptedFile,
     });
 
-    triggerFrontendUpdate({tag: "categories"});
+    triggerFrontendUpdate({ tag: "categories" });
 
     return res.status(201).json({
       ok: true,
@@ -88,7 +88,7 @@ export const updateCategory = async (req: Request, res: Response) => {
       categoryId: id as string,
     });
 
-    triggerFrontendUpdate({tag: "categories"});
+    triggerFrontendUpdate({ tag: "categories" });
 
     return res.status(result.status).json({
       message: result.message || "Opeartion Successful",
@@ -105,7 +105,6 @@ export const updateCategory = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getAllCategories = async (req: Request, res: Response) => {
   try {
     const result = await fetchCategories();
@@ -120,7 +119,7 @@ export const getAllCategories = async (req: Request, res: Response) => {
       message: "Server Couldn't process your request!!!",
     });
   }
-}
+};
 
 export const addProperty = async (req: Request, res: Response) => {
   try {
@@ -128,15 +127,12 @@ export const addProperty = async (req: Request, res: Response) => {
     const body = req.body;
     const files = req.files as Express.Multer.File[];
 
-
     const normalized = Object.fromEntries(
       Object.entries(req.body).map(([key, value]) => [
         key,
         value === "" ? null : value,
       ]),
     );
-
-  
 
     const parsed = {
       ...normalized,
@@ -166,7 +162,7 @@ export const addProperty = async (req: Request, res: Response) => {
       verified: normalized.verified === "true",
       negotiable: normalized.negotiable === "true",
       userId: user.id,
-      handlerId:user.role === "staff" ? user.id : null
+      handlerId: user.role === "staff" ? user.id : null,
     };
 
     if (parsed.verified && user.role !== "admin" && user.role !== "staff") {
@@ -189,10 +185,10 @@ export const addProperty = async (req: Request, res: Response) => {
     });
 
     if (result.listing.verified) {
-      triggerFrontendUpdate({tag: "properties"});
+      triggerFrontendUpdate({ tag: "properties" });
     }
 
-    triggerFrontendUpdate({tag: `listings-${result.listing.userId}`});
+    triggerFrontendUpdate({ tag: `listings-${result.listing.userId}` });
 
     return res.status(201).json({
       ok: true,
@@ -247,31 +243,31 @@ export const getUserListings = async (req: Request, res: Response) => {
           type: true,
           tole: true,
           propertyCode: true,
-          isFeatured:true,
+          isFeatured: true,
           verified: true,
           coverImage: {
-            select:{
-              id:true,
-              url:true
-            }
+            select: {
+              id: true,
+              url: true,
+            },
           },
           images: {
             select: {
-              id:true,
+              id: true,
               url: true,
             },
           },
           location: {
             select: {
-              id:true,
+              id: true,
               name: true,
               municipality: {
                 select: {
-                  id:true,
+                  id: true,
                   name: true,
                   district: {
                     select: {
-                      id:true,
+                      id: true,
                       name: true,
                     },
                   },
@@ -281,7 +277,7 @@ export const getUserListings = async (req: Request, res: Response) => {
           },
           category: {
             select: {
-              id:true,
+              id: true,
               name: true,
             },
           },
@@ -291,7 +287,7 @@ export const getUserListings = async (req: Request, res: Response) => {
     ]);
 
     return res.status(200).json({
-      items:listing,
+      items: listing,
       meta: {
         total,
         page: Number(page),
@@ -321,8 +317,8 @@ export async function verifyListing(req: Request, res: Response) {
       },
     });
 
-    triggerFrontendUpdate({tag: "properties"});
-    triggerFrontendUpdate({tag: `listings-${result.userId}`});
+    triggerFrontendUpdate({ tag: "properties" });
+    triggerFrontendUpdate({ tag: `listings-${result.userId}` });
 
     return res.status(200).json({
       message: "Property Verified!!!",
@@ -353,8 +349,8 @@ export async function featureListing(req: Request, res: Response) {
       data: { isFeatured: !isFeatured },
     });
 
-    triggerFrontendUpdate({tag: "properties"});
-    triggerFrontendUpdate({tag: `listings-${result.userId}`});
+    triggerFrontendUpdate({ tag: "properties" });
+    triggerFrontendUpdate({ tag: `listings-${result.userId}` });
 
     return res.status(200).json({
       message: "Property Featured Successfully!!!",
@@ -516,7 +512,9 @@ export async function getAllProperties(req: Request, res: Response) {
     const q = String(queries.q || "")
       .toLowerCase()
       .trim();
-    const staffId = String(queries.staffId || "").toLowerCase().trim();
+    const staffId = String(queries.staffId || "")
+      .toLowerCase()
+      .trim();
     const c_id = String(queries.c_id || "")
       .toLowerCase()
       .trim();
@@ -573,33 +571,33 @@ export async function getAllProperties(req: Request, res: Response) {
           type: true,
           verified: true,
           isFeatured: true,
-          price:true,
+          price: true,
           propertyCode: true,
           tole: true,
           createdAt: true,
           coverImage: {
             select: {
-              id:true,
+              id: true,
               url: true,
-            }
+            },
           },
           images: {
             select: {
-              id:true,
-              url:true
-            }
+              id: true,
+              url: true,
+            },
           },
           location: {
             select: {
-              id:true,
+              id: true,
               name: true,
               municipality: {
                 select: {
-                  id:true,
+                  id: true,
                   name: true,
                   district: {
                     select: {
-                      id:true,
+                      id: true,
                       name: true,
                     },
                   },
@@ -609,7 +607,7 @@ export async function getAllProperties(req: Request, res: Response) {
           },
           category: {
             select: {
-              id:true,
+              id: true,
               name: true,
             },
           },
@@ -711,9 +709,9 @@ export async function updateProperty(req: Request, res: Response) {
     });
 
     if (user.role === "admin") {
-      triggerFrontendUpdate({tag:"properties"});
-      triggerFrontendUpdate({tag:`listings-${result.ownerId}`});
-      triggerFrontendUpdate({tag:"favourite"});
+      triggerFrontendUpdate({ tag: "properties" });
+      triggerFrontendUpdate({ tag: `listings-${result.ownerId}` });
+      triggerFrontendUpdate({ tag: "favourite" });
     }
 
     return res.status(200).json({
@@ -765,12 +763,12 @@ export async function deactivateListing(req: Request, res: Response) {
     });
 
     if (result.verified) {
-      triggerFrontendUpdate({tag : "properties"});
+      triggerFrontendUpdate({ tag: "properties" });
     }
 
     await Promise.allSettled([
-      triggerFrontendUpdate({tag: `listings-${result.userId}`}),
-      triggerFrontendUpdate({tag: "favourite"}),
+      triggerFrontendUpdate({ tag: `listings-${result.userId}` }),
+      triggerFrontendUpdate({ tag: "favourite" }),
     ]);
 
     res.status(200).json({
@@ -825,9 +823,9 @@ export async function toggleActivateListing(req: Request, res: Response) {
       });
     });
 
-    triggerFrontendUpdate({tag: "properties"});
-    triggerFrontendUpdate({tag: "favourite"});
-    triggerFrontendUpdate({tag: `listings-${result.userId}`});
+    triggerFrontendUpdate({ tag: "properties" });
+    triggerFrontendUpdate({ tag: "favourite" });
+    triggerFrontendUpdate({ tag: `listings-${result.userId}` });
 
     return res.status(200).json({
       message: "Listing status updated successfully",
@@ -930,7 +928,7 @@ export async function updatePropertyOwnerInfo(req: Request, res: Response) {
     const whereCondition = {
       id,
       ...(scope === "own" && { handlerId: user.id }),
-    }
+    };
 
     if (user.role !== "staff" && user.role !== "admin") {
       throw new AppError(403, "Unauthorized!!!");
@@ -948,7 +946,7 @@ export async function updatePropertyOwnerInfo(req: Request, res: Response) {
       message: "User Info Added Successfully",
     });
   } catch (error) {
-   if (error instanceof AppError) {
+    if (error instanceof AppError) {
       return res.status(error.status).json({
         message: error.message,
       });
@@ -1054,7 +1052,7 @@ export async function updateCoverImage(req: Request, res: Response) {
       ...(scope === "own" &&
         (user.role === "client"
           ? { userId: user.id }
-          : { handlerId: user.id })), 
+          : { handlerId: user.id })),
     };
 
     const existingProperty = await prisma.property.findUnique({
@@ -1082,7 +1080,10 @@ export async function updateCoverImage(req: Request, res: Response) {
       },
     });
 
-    triggerFrontendUpdate({tag: "properties", path: `/properties/${existingProperty.id}`});
+    triggerFrontendUpdate({
+      tag: "properties",
+      path: `/properties/${existingProperty.id}`,
+    });
 
     return res.status(200).json({
       message: "Cover Image updated Successfully!!!",
@@ -1113,49 +1114,82 @@ export async function updateCoverImage(req: Request, res: Response) {
 export const changePropertyHandler = async (req: Request, res: Response) => {
   try {
     const user = req.user;
-    const {propertyId} = req.params;
-    const handlerId = req.query.handlerId;
+    const { propertyId } = req.params;
+    const rawHandlerId = req.query.handlerId;
     const { reason } = req.body;
-    if (
-      !propertyId ||
-      Array.isArray(propertyId) ||
-      !handlerId ||
-      Array.isArray(handlerId)
-    ) {
-      throw new AppError(400, "Property ID and Handler ID are required");
-    };
 
-    if(!reason || !reason.trim()) {
-      throw new AppError(400, "Reason for changing handler is required");
+    if (!propertyId || Array.isArray(propertyId)) {
+      throw new AppError(400, "Property ID is required");
     }
 
+    if (!rawHandlerId || Array.isArray(rawHandlerId)) {
+      throw new AppError(400, "Handler ID is required");
+    }
+
+    if (!reason || !reason.trim()) {
+      throw new AppError(
+        400,
+        "Reason for changing handler is required",
+      );
+    }
+
+    const handlerId = rawHandlerId as string;
+    const scope = req.permissionScope;
+
     await prisma.$transaction(async (tx) => {
-      const handler = await tx.user.findUnique({
-        where: { id: handlerId as string},
-      });
-
-      if (!handler || (handler.role !== "staff" && handler.role !== "admin")) {
-        throw new AppError(400, "Invalid handler ID");
-      }
-
+      // Get the property first so we can check its current handler.
       const existingProperty = await tx.property.findUnique({
-        where: { id: propertyId },
+        where: {
+          id: propertyId,
+        },
       });
 
       if (!existingProperty) {
         throw new AppError(
           404,
-          "The property you are trying to update does not exist.",
+          "The property you are trying to update does not exist",
         );
       }
 
-      await tx.property.update({
-        where: { id: propertyId },
-        data: {
-          handlerId: handlerId,
+      // "own" permission means the actor must currently
+      // be the handler of this property.
+      if (
+        scope === "own" &&
+        existingProperty.handlerId !== user.id
+      ) {
+        throw new AppError(
+          403,
+          "You are not permitted to change the handler of this property",
+        );
+      }
+
+      // "all" permission has no current-handler restriction.
+
+      // Validate the new handler.
+      const handler = await tx.user.findUnique({
+        where: {
+          id: handlerId,
         },
       });
 
+      if (
+        !handler ||
+        (handler.role !== "staff" && handler.role !== "admin")
+      ) {
+        throw new AppError(400, "Invalid handler ID");
+      }
+
+      // Update the property with the new handler.
+      await tx.property.update({
+        where: {
+          id: propertyId,
+        },
+        data: {
+          handlerId,
+        },
+      });
+
+      // Record the change.
       await tx.auditLog.create({
         data: {
           actorId: user.id,
@@ -1164,15 +1198,20 @@ export const changePropertyHandler = async (req: Request, res: Response) => {
           action: "UPDATE",
           entityType: "Property",
           entityId: existingProperty.propertyCode.toString(),
+
           oldValues: {
             propertyCode: existingProperty.propertyCode,
             handlerId: existingProperty.handlerId,
           },
+
           newValues: {
             propertyCode: existingProperty.propertyCode,
-            handlerId: handlerId,
+            handlerId,
           },
-          metadata: { reason: reason?.trim() },
+
+          metadata: {
+            reason: reason.trim(),
+          },
         },
       });
     });
@@ -1186,25 +1225,28 @@ export const changePropertyHandler = async (req: Request, res: Response) => {
         message: error.message,
       });
     }
+
     try {
       handlePrismaError(error);
     } catch (dbError) {
       if (dbError instanceof DatabaseError) {
-        return res
-          .status(dbError.statusCode)
-          .json({ message: dbError.message });
+        return res.status(dbError.statusCode).json({
+          message: dbError.message,
+        });
       }
-      return res.status(500).json({ message: "Internal Server Error" });
+
+      return res.status(500).json({
+        message: "Internal Server Error",
+      });
     }
   }
 };
-
 
 export const getRecentListings = async (req: Request, res: Response) => {
   console.log("Fetching recent listings...");
   try {
     const listings = await prisma.property.findMany({
-      where: { isActive: true, verified: true, isSold:false },
+      where: { isActive: true, verified: true, isSold: false },
       orderBy: { createdAt: "desc" },
       take: 10,
       select: {
@@ -1224,8 +1266,8 @@ export const getRecentListings = async (req: Request, res: Response) => {
         category: {
           select: {
             name: true,
-            imageUrl:true,
-            id:true
+            imageUrl: true,
+            id: true,
           },
         },
       },
@@ -1243,8 +1285,7 @@ export const getRecentListings = async (req: Request, res: Response) => {
   }
 };
 
-
-export async function fetchLocationData (req: Request, res: Response) {
+export async function fetchLocationData(req: Request, res: Response) {
   try {
     const result = await fetchLocationTree();
     return res.status(result.status).json(result.result);

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export const useCreateCategory = () => {
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const res = await fetch(
+      return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/add-category`,
         {
           method: "POST",
@@ -14,12 +14,6 @@ export const useCreateCategory = () => {
           body: formData,
         },
       );
-      const data = await res.json();
-      if (!res.ok) {
-        throw data;
-      }
-
-      return data;
     },
     onError: (error) => {
       toast.error(error.message || "Couldn't add category!!!");
@@ -31,7 +25,7 @@ export const useCreateCategory = () => {
 export const useCreateDistrict = () => {
   return useMutation({
     mutationFn: async ({ name }: { name: string }) => {
-      const res = await fetch(
+      return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/add-district`,
         {
           method: "POST",
@@ -42,11 +36,6 @@ export const useCreateDistrict = () => {
           body: JSON.stringify({ name }),
         },
       );
-      const data = await res.json();
-      if (!res.ok) {
-        throw data;
-      }
-      return data;
     },
     onError: (error) => {
       toast.error(error.message || "Couldn't add district!!!");
@@ -64,7 +53,7 @@ export const useCreateMunicipality = () => {
       name: string;
       parentId: string;
     }) => {
-      const res = await fetch(
+      return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/add-municipality`,
         {
           method: "POST",
@@ -75,11 +64,6 @@ export const useCreateMunicipality = () => {
           body: JSON.stringify({ name, parentId }),
         },
       );
-      const data = await res.json();
-      if (!res.ok) {
-        throw data;
-      }
-      return data;
     },
     onError: (error) => {
       toast.error(error.message || "Couldn't add Municipality!!!");
@@ -97,7 +81,7 @@ export const useCreateWard = () => {
       name: string;
       parentId: string;
     }) => {
-      const res = await fetch(
+      return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/add-ward`,
         {
           method: "POST",
@@ -107,12 +91,7 @@ export const useCreateWard = () => {
           },
           body: JSON.stringify({ name, parentId }),
         },
-      );
-      const data = await res.json();
-      if (!res.ok) {
-        throw data;
-      }
-      return data;
+      )
     },
     onError: (error) => {
       toast.error(error.message || "Couldn't add ward");
@@ -209,7 +188,7 @@ export const useFeatureProperty = () => {
 export const useToggleFavourite = () => {
   return useMutation({
     mutationFn: async ({ propertyId }: { propertyId: string }) => {
-      const res = await fetch(
+      return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/toggle-favourite`,
         {
           method: "POST",
@@ -220,14 +199,10 @@ export const useToggleFavourite = () => {
           body: JSON.stringify({ propertyId }),
         },
       );
-      const data = await res.json();
-      if (!res.ok) {
-        throw data;
-      }
-      return data;
     },
     onError:(error) => {
-      toast.error(error.message || "Operation Failed")
+      console.log(error);
+      toast.error(error.message ||"Operation Failed")
     }
   });
 };
