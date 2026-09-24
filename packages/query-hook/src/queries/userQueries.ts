@@ -69,14 +69,13 @@ export const useGetUserInfo = () => {
       const res = await optionalAuthFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/my-info-optional`,
       );
-      console.log("res", res);
       return res.user;
     },
-    staleTime: 10 * 60 * 1000,
-    refetchInterval: 15 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchInterval: 2 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
-}
+};
 
 export const useCheckFavourite = ({
   propertyId,
@@ -154,7 +153,6 @@ export const useGetAdminStaff = (open: boolean) => {
   });
 };
 
-
 export const useGetStaff = (open: boolean) => {
   return useQuery({
     queryKey: ["all-staff"],
@@ -172,13 +170,17 @@ export const useGetStaff = (open: boolean) => {
   });
 };
 
-export const useGetMyTotalPropertyValue = ({enabled} : {enabled: boolean}) => {
+export const useGetMyTotalPropertyValue = ({
+  enabled,
+}: {
+  enabled: boolean;
+}) => {
   return useQuery({
     queryKey: ["my-total-property-value"],
     queryFn: async () => {
       return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/my-total-property-value`,
-        { method: "GET"},
+        { method: "GET" },
       );
     },
     staleTime: 2 * 60 * 60 * 1000,
@@ -186,18 +188,17 @@ export const useGetMyTotalPropertyValue = ({enabled} : {enabled: boolean}) => {
     retry: 1,
     retryDelay: 2000,
     refetchOnWindowFocus: true,
-    enabled:enabled
-  }); 
-}
+    enabled: enabled,
+  });
+};
 
-
-export const useGetAllDesignations = (open:boolean) => {
+export const useGetAllDesignations = (open: boolean) => {
   return useQuery({
     queryKey: ["all-designations"],
     queryFn: async () => {
       return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/permissions/designations`,
-        { method: "GET"},
+        { method: "GET" },
       );
     },
     staleTime: 2 * 60 * 60 * 1000,
@@ -205,18 +206,17 @@ export const useGetAllDesignations = (open:boolean) => {
     retry: 1,
     retryDelay: 2000,
     refetchOnWindowFocus: true,
-    enabled:open
-  }); 
-}
+    enabled: open,
+  });
+};
 
-
-export const useGetDesignationById = (id:string | null) => {
+export const useGetDesignationById = (id: string | null) => {
   return useQuery({
     queryKey: ["designation", id],
     queryFn: async () => {
       return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/permissions/designation/${id}`,
-        { method: "GET"},
+        { method: "GET" },
       );
     },
     staleTime: 2 * 60 * 60 * 1000,
@@ -224,8 +224,28 @@ export const useGetDesignationById = (id:string | null) => {
     retry: 1,
     retryDelay: 2000,
     refetchOnWindowFocus: true,
-    enabled: !!id
-  })
-}
+    enabled: !!id,
+  });
+};
 
-
+export const useGetMyListings = ({
+  page,
+  pageSize,
+}: {
+  page: number;
+  pageSize: number;
+}) => {
+  return useQuery({
+    queryKey: ["my-listings", { page, pageSize }],
+    queryFn: async () => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/my-listings?pageSize=${pageSize}&page=${page}`,
+        { method: "GET" },
+      );
+    },
+    staleTime: 15 * 60 * 1000,
+    retry: 1,
+    retryDelay: 2000,
+    refetchOnWindowFocus: true,
+  });
+};

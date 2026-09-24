@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { SidebarDropdownSection } from "@repo/ui/sideBarDropdownSection";
 import { toast } from "sonner";
-import { useLogOut, useUser } from "@repo/query-hook";
+import { useClientLogOut, useUser } from "@repo/query-hook";
 import { useQueryClient } from "@tanstack/react-query";
 
 const navSections = [
@@ -27,7 +27,7 @@ export default function AdminSidebarClient() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
-  const {mutate,isPending} = useLogOut();
+  const {mutate,isPending} = useClientLogOut();
 
   useEffect(() => {
     setMounted(true);
@@ -166,10 +166,8 @@ export default function AdminSidebarClient() {
             onClick={async () => {
               mutate(undefined, {
                 onSuccess: () => {
-                  queryClient.clear();
                   toast.success("Successfully Logout!!!");
                   router.replace("/auth/signin");
-
                 }
               })
             }}

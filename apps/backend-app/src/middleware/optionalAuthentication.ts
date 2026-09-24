@@ -20,7 +20,6 @@ export const optionalAuthentication = async (
     token = req.cookies.accessToken;
   }
 
-  console.log("TOken", token);
   // Genuine guest
   if (!token) {
     return res.status(401).json({

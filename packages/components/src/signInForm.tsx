@@ -40,12 +40,7 @@ export default function SignInForm({ label }: SignInProps) {
       onSuccess: (data) => {
         if (data?.ok) {
           toast.success("Login Successful!!!");
-          queryClient.invalidateQueries({
-            queryKey: ["user-info"],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ["my-information"],
-          });
+          queryClient.clear();
           router.replace("/");
         } else if (data?.error) {
           toast.error(data.error || "Something Happened");

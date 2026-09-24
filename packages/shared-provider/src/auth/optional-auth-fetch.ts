@@ -1,3 +1,4 @@
+import { queryClient } from "../baseProvider";
 import { refreshAccessToken } from "./refresh-auth";
 
 const request = async (
