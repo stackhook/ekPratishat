@@ -7,7 +7,7 @@ import { getAdminOrStaff, getStaff, getTotalValuation, getUsers } from "../contr
 const userRouter = Router();
 
 userRouter.get("/get-all", checkAuthentication, requireAdmin, getUsers);
-userRouter.get("/get-staff", checkAuthentication, requireAdmin, getStaff);
+userRouter.get("/get-staff", checkAuthentication, requireAdminOrStaff, getStaff);
 userRouter.get("/get-admin-staff", checkAuthentication, requireAdminOrStaff, getAdminOrStaff);
 userRouter.get("/my-total-property-value",checkAuthentication, requireAdminOrStaff, getTotalValuation);
 
