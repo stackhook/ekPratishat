@@ -71,8 +71,8 @@ export const useGetUserInfo = () => {
       );
       return res.user;
     },
-    staleTime: 30 * 1000,
-    refetchInterval: 2 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    refetchInterval:15 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
 };
@@ -240,6 +240,27 @@ export const useGetMyListings = ({
     queryFn: async () => {
       return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/my-listings?pageSize=${pageSize}&page=${page}`,
+        { method: "GET" },
+      );
+    },
+    staleTime: 15 * 60 * 1000,
+    retry: 1,
+    retryDelay: 2000,
+    refetchOnWindowFocus: true,
+  });
+};
+export const useGetMyFavourites = ({
+  page,
+  pageSize,
+}: {
+  page: number;
+  pageSize: number;
+}) => {
+  return useQuery({
+    queryKey: ["my-favourites", { page, pageSize }],
+    queryFn: async () => {
+      return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/mobile/my-favourites?pageSize=${pageSize}&page=${page}`,
         { method: "GET" },
       );
     },

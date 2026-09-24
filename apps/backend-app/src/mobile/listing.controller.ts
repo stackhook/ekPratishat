@@ -138,7 +138,7 @@ export async function getMobileListing(req: Request, res: Response) {
 export const fetchFavourites = async (req: Request, res: Response) => {
   try {
     const user = req.user;
-    const { page = 1, pageSize = 10 } = req.query;
+    const { page = 1, pageSize = 12 } = req.query;
 
     if (Number(page) <= 0 || Number(pageSize) <= 0) {
       return res.status(400).json({
@@ -152,10 +152,16 @@ export const fetchFavourites = async (req: Request, res: Response) => {
           userId: user?.id,
         },
       }),
+      
 
       prisma.favourite.findMany({
         where: {
           userId: user?.id,
+        },
+        skip: (Number(page) - 1) * Number(pageSize),
+        take: Number(pageSize),
+        orderBy: {
+          createdAt: "desc",
         },
         select: {
           property: {

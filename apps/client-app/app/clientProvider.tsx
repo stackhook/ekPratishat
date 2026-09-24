@@ -51,7 +51,7 @@ export function ClientProvider({
       <SessionExpiredSignInModal
         open={sessionExpired}
         onLoginSuccess={() => {
-          queryClient.clear();
+          queryClient.invalidateQueries();
           setSessionExpired(false);
         }}
         onCancel={() => {

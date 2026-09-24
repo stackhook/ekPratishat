@@ -50,7 +50,7 @@ export function AdminProviders({
             <SessionExpiredSignInModal
                 open={sessionExpired}
                 onLoginSuccess={() => {
-                    queryClient.clear();
+                    queryClient.invalidateQueries();
                     setSessionExpired(false);
                 }}
                 onCancel={() => {

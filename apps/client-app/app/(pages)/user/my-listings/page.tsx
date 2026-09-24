@@ -1,53 +1,32 @@
-import { jwtVerify } from "jose";
+"use client";
+
 import { Clock, RefreshCw } from "lucide-react";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import MyListingCard from "../../../../components/user-related/MyListingCard";
 import type { Listing } from "../../../../components/user-related/MyListingCard";
 import Pagination from "../../../../components/properties/Pagination";
 import Link from "next/link";
+import { useGetMyListings } from "@repo/query-hook";
+import AnimateLoader from "@repo/ui/animateLoader";
 
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 
-export default async function MyListingPage({
-    searchParams,
-}: {
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-    const sp = await searchParams;
-    const page = Number(sp.page || 1);
-    const pageSize = Number(sp.pageSize || 12);
-    const cookieStore = await cookies();
-    const token = cookieStore.get("accessToken")?.value;
+export default function MyListingPage() {
+    const sp = useSearchParams();
+    const page = Number(sp.get("page") || 1);
+    const pageSize = Number(sp.get("pageSize") || 12);
 
-    if (!token) redirect("/auth/signin");
-    let userId;
-    try {
-        // 1. Verify Token
-        const { payload } = await jwtVerify(token, SECRET);
-        userId = payload.userId;
-    } catch {
-        redirect("/auth/signin");
+    const { data, isLoading, isError } = useGetMyListings({ page, pageSize });
+  
+
+    if (isLoading) {
+        return <div className="flex justify-center items-center w-full h-screen">
+            <AnimateLoader />
+        </div>
     }
 
-    // 2. Fetch Data
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/my-listings?pageSize=${pageSize}&page=${page}`, {
-        headers: { 'Cookie': cookieStore.toString() },
-        next: { tags: [`listings-${userId}`, `listings-${userId}-p${page}`] },
-        cache: 'force-cache'
-    });
 
-
-    // 3. Check for specific status codes (like 401/403)
-    if (res.status === 401) {
-        console.log("Unauthorized access. Redirecting to signin.");
-        redirect("/auth/signin");
-    }
-
-    if (!res.ok) {
-        // This is where you return the "Failed" UI instead of throwing
-        // Inside your (!res.ok) block
+    if (isError) {
         return (
             <div className="mx-auto max-w-7xl px-4 pb-20 pt-[calc(var(--site-nav-height)+2rem)]">
                 <div className="flex flex-col items-center justify-center rounded-3xl border border-[var(--ek-border-soft)] bg-[var(--ek-bg-card)] p-12 text-center shadow-[var(--ek-shadow-card)] dark:border-[var(--ek-dark-border)] dark:bg-[var(--ek-dark-surface)] dark:shadow-[var(--ek-dark-shadow-card)]">
@@ -94,7 +73,7 @@ export default async function MyListingPage({
         );
     }
 
-    const data = await res.json();
+
     const listings = data.items;
     const meta = data.meta;
 
