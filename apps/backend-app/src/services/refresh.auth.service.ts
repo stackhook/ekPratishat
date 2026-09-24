@@ -1,5 +1,9 @@
 import { DatabaseError, handlePrismaError, prisma } from "@repo/database";
-import { generateRefreshToken, generateToken, hashRefreshToken } from "../utils/jwt.js";
+import {
+  generateRefreshToken,
+  generateToken,
+  hashRefreshToken,
+} from "../utils/jwt.js";
 import { AppError } from "@repo/functions";
 
 export async function refreshSession(refreshToken: string) {
@@ -50,16 +54,12 @@ export async function refreshSession(refreshToken: string) {
     // Build staff permissions
     let compactPermissions: string[] = [];
 
-    if (
-      session.user.role === "staff" &&
-      session.user.designation
-    ) {
-      compactPermissions =
-        session.user.designation.permissions.map((dp) => {
-          const p = dp.permission;
+    if (session.user.role === "staff" && session.user.designation) {
+      compactPermissions = session.user.designation.permissions.map((dp) => {
+        const p = dp.permission;
 
-          return `${p.resource}:${p.action}:${p.scope}`;
-        });
+        return `${p.resource}:${p.action}:${p.scope}`;
+      });
     }
 
     // Generate new access token
@@ -81,6 +81,12 @@ export async function refreshSession(refreshToken: string) {
       },
       data: {
         refreshTokenHash: newRefreshTokenHash,
+        expiresAt: new Date(
+          Date.now() +
+            (session.user.role !== "client"
+              ? 30 * 60 * 1000
+              : 30 * 24 * 60 * 60 * 1000),
+        ),
         lastUsedAt: new Date(),
       },
     });
@@ -100,10 +106,7 @@ export async function refreshSession(refreshToken: string) {
       handlePrismaError(error);
     } catch (dbError) {
       if (dbError instanceof DatabaseError) {
-        throw new AppError(
-          dbError.statusCode,
-          dbError.message,
-        );
+        throw new AppError(dbError.statusCode, dbError.message);
       }
 
       throw new AppError(500, "Internal Server Error");

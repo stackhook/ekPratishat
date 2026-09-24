@@ -79,7 +79,7 @@ export const signIn = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:  user.role !== "client"
-          ? 2* 60 * 60 * 1000
+          ? 30 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/",
       domain:
@@ -94,7 +94,7 @@ export const signIn = async (req: Request, res: Response) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:
         user.role === "admin" || user.role === "staff"
-          ? 2 * 60 * 60 * 1000
+          ? 30 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/auth/refresh",
       domain:
@@ -821,7 +821,6 @@ export async function refreshAccessToken(req: Request, res: Response) {
       ? req.body?.refreshToken
       : req.cookies?.refreshToken;
 
-    console.log("Refresh TOken, refresh", refreshToken);
 
     if (!refreshToken) {
       throw new AppError(401, "Refresh token missing!!!");
@@ -853,7 +852,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:
         result.user.role !== "client"
-          ? 12 * 60 * 60 * 1000
+          ? 30 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/auth/refresh",
       domain:
@@ -867,7 +866,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge:
         result.user.role !== "client"
-          ? 12 * 60 * 60 * 1000
+          ? 30 * 60 * 1000
           : 30 * 24 * 60 * 60 * 1000,
       path: "/",
       domain:
