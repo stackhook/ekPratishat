@@ -8,7 +8,6 @@ export const checkAuthentication = async (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log("checkAuthentication middleware ran");
   let token: string | undefined;
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer")) {

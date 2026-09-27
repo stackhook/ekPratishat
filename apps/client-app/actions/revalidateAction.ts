@@ -13,12 +13,10 @@ export async function revalidateTagPathAction({tag = [], path=""}: TagType){
     if (tag.length > 0) {
         tag.map((t) => {
             revalidateTag(t);
-            console.log("revalidated tag", t);
         })
     }
     if (path) {
         revalidatePath(path)
-        console.log("Revalidated path", path );
     }
     return;
 }
@@ -31,7 +29,6 @@ export async function revalidateWithUserId({tag = "", path=""}) {
 
     if(tag) {
         revalidateTag(`${tag}-${userId}`)
-        console.log(`REvalidated ${tag}-${userId}`)
     }
     if (path){
         revalidatePath(`${path}-${userId}`)

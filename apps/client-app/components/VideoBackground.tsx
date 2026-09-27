@@ -1,5 +1,5 @@
 import Navbar from "./Navbar";
-import { SearchBox } from "./SearchBox";
+
 
 export default function VideoBackground() {
   return (
@@ -31,7 +31,7 @@ export default function VideoBackground() {
           </h1>
           
           <div className="w-full max-w-xl">
-            <SearchBox />
+            {/* <SearchBox /> */}
           </div>
         </div>
 

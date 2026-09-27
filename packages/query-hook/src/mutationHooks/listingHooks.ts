@@ -201,7 +201,6 @@ export const useToggleFavourite = () => {
       );
     },
     onError:(error) => {
-      console.log(error);
       toast.error(error.message ||"Operation Failed")
     }
   });

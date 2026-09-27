@@ -2,13 +2,20 @@ import { refreshAccessToken } from "./refresh-auth";
 import { sessionManager } from "./session-manager";
 
 
+type AuthenticatedFetchOptions = RequestInit & {
+  suppressSessionExpired?: boolean;
+};
+
 const request = async (
   url: string,
-  options: RequestInit,
+  options: AuthenticatedFetchOptions,
   isRetry: boolean,
 ): Promise<any> => {
+
+  const { suppressSessionExpired, ...requestOptions } = options;
+
   const response = await fetch(url, {
-    ...options,
+    ...requestOptions,
     credentials: "include",
   });
 
@@ -23,7 +30,9 @@ const request = async (
   }
 
   if (response.status === 401) {
-    sessionManager.notifySessionExpired();
+    if(!suppressSessionExpired && !sessionManager.isLogoutInProgress()){
+      sessionManager.notifySessionExpired();
+    }
 
     throw {
       message: "Session expired. Please sign in again.",
@@ -43,7 +52,7 @@ const request = async (
 
 export const authenticatedFetch = async (
   url: string,
-  options: RequestInit = {},
+  options:AuthenticatedFetchOptions = {},
 ): Promise<any> => {
   return request(url, options, false);
 };

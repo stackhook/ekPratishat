@@ -1,5 +1,5 @@
 import { getAgentDetailAction, getAgentListAction } from "@repo/actions";
-import { authenticatedFetch, optionalAuthFetch } from "@repo/shared-provider";
+import { authenticatedFetch, optionalAuthFetch, queryClient, sessionManager } from "@repo/shared-provider";
 import { useQuery } from "@tanstack/react-query";
 
 interface UserProps {
@@ -52,12 +52,16 @@ export const useUser = () => {
     queryFn: async () => {
       const res = await authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/my-info`,
+        // {
+        //   suppressSessionExpired:true
+        // }
       );
       return res.user;
     },
-    retry: 1,
-    staleTime: 1 * 60 * 1000,
-    refetchInterval: 2 * 60 * 1000,
+    retry: false,
+    enabled:!sessionManager.isLogoutInProgress(),
+    staleTime: 2 * 60 * 1000, 
+    refetchInterval: 5 *60 * 1000,
     refetchOnWindowFocus: true,
   });
 };
@@ -66,13 +70,20 @@ export const useGetUserInfo = () => {
   return useQuery({
     queryKey: ["my-information"],
     queryFn: async () => {
-      const res = await optionalAuthFetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/my-info-optional`,
-      );
-      return res.user;
+      try {
+        const res = await authenticatedFetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/my-info`,
+          {
+            suppressSessionExpired: true,
+          },
+        );
+        return res.user ?? null;
+      } catch {
+        return null;
+      }
     },
     staleTime: 10 * 60 * 1000,
-    refetchInterval:15 * 60 * 1000,
+    refetchInterval: 15 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
 };

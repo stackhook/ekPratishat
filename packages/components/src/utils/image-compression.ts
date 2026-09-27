@@ -15,7 +15,6 @@ export async function compressImage(file: File): Promise<File> {
       lastModified: Date.now(),
     });
   } catch (error) {
-    console.error("Image compression failed:", error);
     return file; // fallback
   }
 }

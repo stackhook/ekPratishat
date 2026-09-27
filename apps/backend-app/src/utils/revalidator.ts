@@ -4,8 +4,6 @@ export const triggerFrontendUpdate = async ({tag = "",path=""}) => {
   try {
     const res = await fetch(url, { method: 'POST' });
     const data = await res.json();
-    console.log("Revalidation triggered:", data);
   } catch (error) {
-    console.error("Failed to notify frontend:", error);
   }
 };  

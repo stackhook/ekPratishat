@@ -467,7 +467,6 @@ export const AddPropertyForm: React.FC<Props> = ({ initialData,
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log(formData);
     if (images.length + existingImages.length - deleteImageIds.length === 0) {
       toast.error("Please add atleast 1 image");
       return;

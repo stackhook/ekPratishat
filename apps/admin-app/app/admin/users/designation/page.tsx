@@ -48,8 +48,8 @@ export default function DesignationPage() {
 
   const handleDelete = async (id: string, title: string) => {
     if (confirm(`Are you sure you want to delete the "${title}" designation?`)) {
-      // TODO: Trigger your delete mutation hook here
-      console.log("Delete designation ID:", id);
+      // // TODO: Trigger your delete mutation hook here
+      // console.log("Delete designation ID:", id);
     }
   };
 

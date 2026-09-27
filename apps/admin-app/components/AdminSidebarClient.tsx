@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { SidebarDropdownSection } from "@repo/ui/sideBarDropdownSection";
 import { toast } from "sonner";
-import { useClientLogOut, useGetUserInfo, useUser } from "@repo/query-hook";
+import { useClientLogOut, useGetUserInfo, useLogOut, useUser } from "@repo/query-hook";
 import { useQueryClient } from "@tanstack/react-query";
 
 const navSections = [
@@ -23,15 +23,22 @@ const navSections = [
 export default function AdminSidebarClient() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { data: user, isLoading } = useGetUserInfo();
+  const { data: user, isLoading } = useUser();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
-  const {mutate,isPending} = useClientLogOut();
+  const {mutate,isPending} = useLogOut();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+  if (!isLoading && user?.role?.toLowerCase() === "client") {
+    router.replace("/auth/signin");
+  }
+}, [user, isLoading, router]);
+
 
   if (isLoading || !mounted) {
     return null; // or a loading spinner
@@ -166,9 +173,9 @@ export default function AdminSidebarClient() {
             onClick={async () => {
               mutate(undefined, {
                 onSuccess: () => {
-                  queryClient.clear();
+                  // queryClient.clear();
                   toast.success("Successfully Logout!!!");
-                  router.replace("/auth/signin");
+                  // router.replace("/auth/signin");
                 }
               })
             }}

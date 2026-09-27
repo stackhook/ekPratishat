@@ -31,6 +31,8 @@ export async function refreshSession(refreshToken: string) {
       },
     });
 
+   
+
     if (!session) {
       throw new AppError(401, "Invalid refresh token");
     }

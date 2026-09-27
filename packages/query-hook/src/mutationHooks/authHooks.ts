@@ -1,5 +1,5 @@
 // @repo/query-hook/src/hooks/useCreateUser.ts
-import { authenticatedFetch, optionalAuthFetch } from "@repo/shared-provider";
+import { authenticatedFetch, optionalAuthFetch, queryClient, sessionManager } from "@repo/shared-provider";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -100,15 +100,19 @@ export const useSignInUser = () => {
 export const useLogOut = () => {
   return useMutation({
     mutationFn: async() => {
+      sessionManager.startLogout();
+
       return authenticatedFetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signout`,
         {
-          method:"POST"
+          method:"POST",
+          suppressSessionExpired: true
         }
       )
     },
-    onError: (error) => {
-      toast.error(error.message || "Unexpected Error");
+     onSettled: () => {
+      queryClient.clear();
+      window.location.replace("/");
     },
   })
 }

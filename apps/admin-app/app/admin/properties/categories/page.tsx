@@ -144,7 +144,7 @@ export default function AllCategories() {
 
                                         <button
                                             className="p-1.5 rounded-lg border border-gray-200 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition"
-                                            onClick={() => console.log("delete", category.id)}
+                                            // onClick={() => console.log("delete", category.id)}
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>

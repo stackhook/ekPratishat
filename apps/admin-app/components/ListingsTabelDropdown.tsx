@@ -22,7 +22,6 @@ export default function PropertyTableDropdown({
   onPageChange,
 }: Props) {
   const [openRow, setOpenRow] = useState<string | null>(null);
-  console.log(listings);
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-secondary-900 rounded-xl border border-secondary-200 dark:border-secondary-700 shadow-sm overflow-hidden">

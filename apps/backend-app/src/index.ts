@@ -16,7 +16,6 @@ import mobileRouter from './routes/mobileRoute.js';
 
 // dotenv.config();
 
-console.log(process.env.JWT_SECRET);
 
 const PORT = process.env.PORT || 4000;
 

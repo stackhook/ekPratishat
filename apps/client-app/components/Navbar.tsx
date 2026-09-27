@@ -16,7 +16,7 @@ import { ToggleTheme } from "@repo/components/toggleTheme";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useClientLogOut, useGetUserInfo } from "@repo/query-hook";
+import { useClientLogOut, useGetUserInfo, useLogOut } from "@repo/query-hook";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import ScrollLogoTransition from "./hero/ScrollLogoTransition";
@@ -87,7 +87,7 @@ const Navbar = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: user, isLoading } = useGetUserInfo();
-  const {mutate,isPending} = useClientLogOut();
+  const {mutate,isPending} = useLogOut();
   const { mode, isMounted: isHeroPerformanceMounted } = useHeroPerformanceMode();
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   /**
@@ -494,8 +494,8 @@ const Navbar = () => {
     mutate(undefined, {
       onSuccess: (data) => {
         toast.success(data.message || "Logout Successfully");
-        queryClient.clear();
-        router.replace("/");
+        // queryClient.clear();
+        // router.replace("/");
       }
     })
   };

@@ -195,13 +195,11 @@ export const addProperty = async (req: Request, res: Response) => {
       message: "Property added successfully",
     });
   } catch (err) {
-    console.error(err);
     if (err instanceof AppError) {
       return res.status(err.status).json({
         message: err.message,
       });
     }
-    console.error(err);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -296,7 +294,6 @@ export const getUserListings = async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -356,7 +353,6 @@ export async function featureListing(req: Request, res: Response) {
       message: "Property Featured Successfully!!!",
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       message: "Internal Server Error!!!",
     });
@@ -398,7 +394,6 @@ export async function toggleFavourite(req: Request, res: Response) {
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.log(error.message);
     }
 
     return res.status(500).json({
@@ -419,7 +414,7 @@ export async function checkFavourite(req: Request, res: Response) {
 
     return res.status(200).json({ result: !!existing });
   } catch (err) {
-    console.error("getting favourite error", err);
+
     return res.status(200).json({
       result: false,
     });
@@ -470,7 +465,7 @@ export async function fetchUserFavourites(req: Request, res: Response) {
       result,
     });
   } catch (err) {
-    console.error(err);
+
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -663,7 +658,7 @@ export async function updateProperty(req: Request, res: Response) {
       deleteImageIds = [];
     }
 
-    console.log("Print ImageIds", deleteImageIds);
+
     const parsed = {
       ...normalized,
       lat: normalized.lat ? Number(normalized.lat) : null,
@@ -724,7 +719,7 @@ export async function updateProperty(req: Request, res: Response) {
         message: err.message,
       });
     }
-    console.error(err);
+ 
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -889,7 +884,6 @@ export async function deleteProperty(req: Request, res: Response) {
         try {
           await fs.promises.unlink(filePath);
         } catch (err) {
-          console.error(err);
         }
       }),
     );
@@ -1243,7 +1237,6 @@ export const changePropertyHandler = async (req: Request, res: Response) => {
 };
 
 export const getRecentListings = async (req: Request, res: Response) => {
-  console.log("Fetching recent listings...");
   try {
     const listings = await prisma.property.findMany({
       where: { isActive: true, verified: true, isSold: false },
@@ -1278,7 +1271,6 @@ export const getRecentListings = async (req: Request, res: Response) => {
       listings,
     });
   } catch (err) {
-    console.error(err);
     return res.status(500).json({
       message: "Internal Server Error",
     });

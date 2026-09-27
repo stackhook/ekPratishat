@@ -43,7 +43,6 @@ export default function AddAmenity() {
     const handleVerify = (e: React.FormEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log(form);
         mutate(form, {
             onSuccess: (data) => {
                 toast.success(data.message || "Operation Success");

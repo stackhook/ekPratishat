@@ -214,7 +214,6 @@ export async function createUser({
     return response;
   } catch (error) {
     await Promise.allSettled(uploadedFiles.map((f) => fs.promises.unlink(f)));
-    console.log("Error in DB transaction:", error);
     if (error instanceof AppError) throw error;
 
     throw new AppError(500, "Internal server error!!!");

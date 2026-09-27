@@ -75,7 +75,6 @@ export async function fetchListings({
         }
 
     }catch(e){
-        console.error(e);
         throw new AppError(500, "Failed to fetch listings")
     }
 }

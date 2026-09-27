@@ -213,7 +213,6 @@ SELECT
 FROM merged
 RETURNING "id";
 `) as InsertRow[];
-console.log("INSERT RESULT:", result);
 if (!result || result.length === 0) {
   throw new AppError(
     400,

@@ -25,8 +25,6 @@ export default function PropertyDetail(){
         );
     }
 
-    console.log(data);
-
     return (
         <div>Proeprty</div>
     )

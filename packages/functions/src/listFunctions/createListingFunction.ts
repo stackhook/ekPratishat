@@ -196,7 +196,7 @@ export async function createListingFunction({
       status: 200,
     };
   } catch (error) {
-    console.error("Error creating listing:", error);
+ 
     // Optionally: clean up images from disk if DB fails
     imageUrls.forEach((url) => {
       const filePath = path.join(IMAGE_DIR, path.basename(url));

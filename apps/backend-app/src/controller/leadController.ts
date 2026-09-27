@@ -160,7 +160,6 @@ export const getLeads = async (req: Request, res: Response) => {
       },
     });
   } catch (error: any) {
-    console.error("Error inside getLeads controller pipeline:", error);
     return res.status(500).json({
       success: false,
       message:
@@ -878,7 +877,6 @@ export async function getTodayFollowUpLead(req: Request, res: Response) {
       result,
     });
   } catch (error) {
-    console.error("Time-zone bounded query failed:", error);
     return res.status(500).json({
       message: "Server couldn't process your request. Try again later",
     });

@@ -78,9 +78,8 @@ export const signIn = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge:  user.role !== "client"
-          ? 30 * 60 * 1000
-          : 30 * 24 * 60 * 60 * 1000,
+      maxAge:
+        user.role !== "client" ? 30 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000,
       path: "/",
       domain:
         process.env.NODE_ENV === "production"
@@ -268,7 +267,6 @@ export const verifyAgent = async (req: Request, res: Response) => {
       result,
     });
   } catch (err) {
-    console.error("Error verifying agent:", err);
     return res.status(500).json({
       message: "Internal Server Error!!!",
     });
@@ -277,6 +275,8 @@ export const verifyAgent = async (req: Request, res: Response) => {
 
 export const signOut = async (req: Request, res: Response) => {
   try {
+    const isMobile = req.query.isMobile === "true";
+
     const user = req.user;
     await prisma.session.update({
       where: { id: user.sessionId },
@@ -284,6 +284,12 @@ export const signOut = async (req: Request, res: Response) => {
         revokedAt: new Date(),
       },
     });
+
+    if(isMobile){
+      return res.status(200).json({
+        message: "Logged Out Successfully!!!"
+      })
+    }
 
     res.clearCookie("accessToken", {
       httpOnly: true,
@@ -463,7 +469,7 @@ export const toggleActive = async (req: Request, res: Response) => {
       ok: true,
     });
   } catch (err) {
-    console.error("Error removing agent:", err);
+
     return res.status(500).json({
       message: "Internal Server Error!!!",
     });
@@ -517,7 +523,7 @@ export async function changeUserRole(req: Request, res: Response) {
     if (error instanceof AppError) {
       return res.status(error.status).json({ message: error.message });
     }
-    console.error("Error changing user role:", error);
+
     return res.status(500).json({
       message: "Internal Server Error!!!",
     });
@@ -750,7 +756,6 @@ export async function updateProfileImage(req: Request, res: Response) {
       try {
         fsSync.unlinkSync(absoluteUploadedPath);
       } catch (e) {
-        console.error("Failed to remove orphaned file in rollback step:", e);
       }
     }
     return res.status(500).json({
@@ -816,11 +821,13 @@ export async function changePassword(req: Request, res: Response) {
 export async function refreshAccessToken(req: Request, res: Response) {
   const isMobile = req.query.isMobile === "true";
 
+
   try {
     const refreshToken = isMobile
       ? req.body?.refreshToken
       : req.cookies?.refreshToken;
 
+   
 
     if (!refreshToken) {
       throw new AppError(401, "Refresh token missing!!!");
@@ -881,7 +888,6 @@ export async function refreshAccessToken(req: Request, res: Response) {
     });
   } catch (error) {
     if (!isMobile) {
-      console.log("Clearing cookies due to refresh token failure.");
       res.clearCookie("accessToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

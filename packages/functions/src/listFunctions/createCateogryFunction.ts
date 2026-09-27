@@ -92,7 +92,6 @@ export async function addCategory({ body, file }: { body: any; file: Upload }) {
     if (error instanceof AppError) {
       throw error;
     }
-    console.error(error);
     throw new AppError(500, "Internal Server Error");
   }
 }

@@ -114,7 +114,6 @@ export const getPropertiesQuery = async (input: Input) => {
 //Featured Properties
 
 export const _getFeaturedProperties = async (input: Input) => {
-    console.log("Fetching feature properties");
     const page = Math.max(1, Number(input.page || 1));
     const pageSize = Math.min(100, Math.max(1, Number(input.pageSize || 21)));
     const q = input.q?.trim();
