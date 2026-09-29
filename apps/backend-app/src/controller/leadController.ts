@@ -111,7 +111,7 @@ export const getLeads = async (req: Request, res: Response) => {
       ? statusFilter
       : undefined;
 
-    const numQ = q && !isNaN(Number(q)) ? parseInt(q, 10) : null;
+    const numQ = q && /^\d{1,6}$/.test(q) ? Number(q) : null;
 
     const whereClause = {
       ...(q && {
@@ -254,12 +254,10 @@ export async function updateLeadStatus(req: Request, res: Response) {
     });
 
     if (!checkExistingStatus) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "Lead record not found or You may not have permission to update this record.",
-        });
+      return res.status(404).json({
+        message:
+          "Lead record not found or You may not have permission to update this record.",
+      });
     }
 
     if (checkExistingStatus.status === status) {
@@ -423,12 +421,10 @@ export async function updateFollowUpTime(req: Request, res: Response) {
     });
 
     if (!checkExistingStatus) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "Lead record not found or You may not have permission to update this record.",
-        });
+      return res.status(404).json({
+        message:
+          "Lead record not found or You may not have permission to update this record.",
+      });
     }
 
     // if (user.role !== "admin" && checkExistingStatus.managedById !== user.id) {
@@ -724,7 +720,10 @@ export async function changeHandler(req: Request, res: Response) {
       });
 
       if (!existingLead) {
-        throw new AppError(404, "Lead not found or You may not have permission to perform this action.");
+        throw new AppError(
+          404,
+          "Lead not found or You may not have permission to perform this action.",
+        );
       }
 
       // if (user.role === "staff" && user.id !== existingLead.managedById) {
@@ -979,7 +978,6 @@ export const updateCompulsoryParameter = async (
       id,
       ...(scope === "own" && { managedById: user.id }),
     };
-
 
     const existingLead = await prisma.lead.findUnique({
       where: whereCondition,

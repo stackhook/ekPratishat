@@ -24,6 +24,7 @@ import {
   getUserListings,
   toggleActivateListing,
   toggleFavourite,
+  togglePropertySoldOut,
   updateCategory,
   updateCoverImage,
   updateProperty,
@@ -65,6 +66,7 @@ listingRouter.put("/mark-featured",checkAuthentication,requireAdmin,featureListi
 listingRouter.put("/update-cover/:id", checkAuthentication,checkPermission("properties", "update"),updateCoverImage);
 listingRouter.put("/update-category/:id",checkAuthentication,requireAdmin,uploadUserFiles.single("image"),updateCategory);
 listingRouter.put("/change-handler/:propertyId", checkAuthentication,requireAdminOrStaff, checkPermission("properties", "update"), changePropertyHandler);
+listingRouter.put("/toggle-sold/:id", checkAuthentication,checkPermission("property","update"), togglePropertySoldOut);
 listingRouter.put("/:id", checkAuthentication, requireAdmin, toggleActivateListing);
 
 listingRouter.get("/categories", getAllCategories);
@@ -73,8 +75,6 @@ listingRouter.get("/my-favourites",checkAuthentication,fetchUserFavourites);
 listingRouter.get("/get-all",checkAuthentication,requireAdminOrStaff,getAllProperties);
 listingRouter.get("/amenities", getAmenities);
 listingRouter.get("/:id", getListingById);
-
-
 
 
 listingRouter.delete("/delete/:id", checkAuthentication, requireAdmin, deleteProperty);

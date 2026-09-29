@@ -37,6 +37,7 @@ export async function fetchPropertyDetal(id: string) {
         floorLevel: true,
         amenities: true,
         isFeatured: true,
+        isSold:true,
         leadNotes: true,
         images: {
           select: {

@@ -33,6 +33,7 @@ export default function PropertiesListPage() {
     const [isVerified, setIsVerified] = useState(sp.get("isVerified") ?? "");
     const [isActive, setIsActive] = useState(sp.get("isActive") || "");
     const [isFeatured, setIsFeatured] = useState(sp.get("isFeatured") || "");
+    const [isSold, setIsSold] = useState(sp.get("isSold") || "");
 
     const [isPending, startTransition] = useTransition();
 
@@ -45,6 +46,7 @@ export default function PropertiesListPage() {
         setIsActive(sp.get("isActive") || "");
         setIsFeatured(sp.get("isFeatured") || "");
         setStaffId(sp.get("staffId") || "");
+        setIsSold(sp.get("isSold") || "")
     }, [sp]);
 
     const { data: user, isLoading: userLoading, isError: isUserError, error: userError } = useUser();
@@ -52,7 +54,7 @@ export default function PropertiesListPage() {
 
     const effectiveStaffId = (user?.role === "staff" && user?.designation?.trim().toUpperCase() !== "RECEPTIONIST") ? user.id : staffId;
 
-    const { data, isLoading, isError, error } = useGetAllProperties({ page, pageSize: 20, c_id, isActive, isFeatured, type, isVerified, q, staffId: effectiveStaffId, enabled:!userLoading });
+    const { data, isLoading, isError, error } = useGetAllProperties({ page, pageSize: 20, c_id, isActive, isFeatured, type, isVerified, q, staffId: effectiveStaffId, enabled:!userLoading, isSold });
     const { data: categories, isLoading: categoriesLoading } = useGetAllCategories();
 
 
@@ -135,8 +137,9 @@ export default function PropertiesListPage() {
         setCatId("");
         setType("");
         setInput("");
+        setIsSold("");
 
-        if (user.role === "staff") {
+        if (user.role === "staff" && user?.designation?.trim().toUpperCase() !== "RECEPTIONIST") {
             setStaffId(user.id);
 
             const params = new URLSearchParams();
@@ -233,7 +236,7 @@ export default function PropertiesListPage() {
                                     {isPending ? "Searching..." : "Search Properties"}
                                 </button>
 
-                                {(q || isVerified || type || isActive || isFeatured || c_id || staffId) && (
+                                {(q || isVerified || type || isActive || isFeatured || c_id || staffId || isSold) && (
                                     <button
                                         onClick={resetAll}
                                         className="p-4 bg-red-50 dark:bg-red-900/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all"
@@ -301,6 +304,17 @@ export default function PropertiesListPage() {
                                     <option value="">All Status</option>
                                     <option value="true">Verified</option>
                                     <option value="false">Not Verified</option>
+                                </select>
+                            </FilterGroup>
+                            <FilterGroup label="Sale Status" icon={<ShieldCheck size={14} />}>
+                                <select
+                                    value={isSold}
+                                    onChange={(e) => applyFilters({ isSold: e.target.value })}
+                                    className="bg-secondary-50 dark:bg-secondary-900/50 border border-secondary-200 dark:border-secondary-700 rounded-lg px-3 py-2 text-sm w-full cursor-pointer dark:text-white appearance-none focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all pr-10"
+                                >
+                                    <option value="">All</option>
+                                    <option value="true">Sold</option>
+                                    <option value="false">Not Sold</option>
                                 </select>
                             </FilterGroup>
 

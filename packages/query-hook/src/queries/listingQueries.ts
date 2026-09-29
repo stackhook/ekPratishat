@@ -17,8 +17,9 @@ interface PropertyQueryType {
   c_id?: string;
   isActive?: string;
   q?: string;
-  staffId?:string;
-  enabled?:boolean;
+  staffId?: string;
+  enabled?: boolean;
+  isSold?: string;
 }
 
 export const useGetCategories = () => {
@@ -42,7 +43,7 @@ export const useGetLocationTree = () => {
     staleTime: 60 * 60 * 1000,
     refetchOnMount: (data) => !data,
     refetchOnWindowFocus: true,
-});
+  });
 };
 
 export const useFetchPropertyDetail = (id: string) => {
@@ -96,9 +97,8 @@ export const useGetAllCategories = () => {
 
       return data;
     },
-    staleTime:5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
-  
 };
 
 export const useGetAllProperties = ({
@@ -112,11 +112,22 @@ export const useGetAllProperties = ({
   q = "",
   staffId = "",
   enabled = true,
+  isSold,
 }: PropertyQueryType) => {
   return useQuery({
     queryKey: [
       "all-properties",
-      { page, c_id, isActive, isFeatured, type, isVerified, q,staffId },
+      {
+        page,
+        c_id,
+        isActive,
+        isFeatured,
+        type,
+        isVerified,
+        q,
+        staffId,
+        isSold,
+      },
     ],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -128,7 +139,8 @@ export const useGetAllProperties = ({
         ...(isActive !== "" && { isActive: String(isActive) }),
         ...(isVerified !== "" && { isVerified: String(isVerified) }),
         ...(isFeatured !== "" && { isFeatured: String(isFeatured) }),
-        ...(staffId && {staffId})
+        ...(staffId && { staffId }),
+        ...(isSold !== "" && { isSold: String(isSold) }),
       });
 
       return authenticatedFetch(

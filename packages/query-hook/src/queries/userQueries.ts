@@ -72,7 +72,7 @@ export const useGetUserInfo = () => {
     queryFn: async () => {
       try {
         const res = await authenticatedFetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/my-info`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/mobile/me`,
           {
             suppressSessionExpired: true,
           },

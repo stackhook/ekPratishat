@@ -24,6 +24,7 @@ export async function getMobileListing(req: Request, res: Response) {
         verified: true,
         createdAt: true,
         noOfBedRooms: true,
+        isSold:true,
         noOfRestRooms: true,
 
         handler: {
@@ -172,6 +173,7 @@ export const fetchFavourites = async (req: Request, res: Response) => {
               type: true,
               tole: true,
               propertyCode: true,
+              isSold:true,
               isFeatured: true,
               verified: true,
               coverImage: {

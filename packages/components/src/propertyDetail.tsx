@@ -27,6 +27,7 @@ import NotesCard from "./notesCard";
 import DynamicIcon from "./DynamicIcon";
 import UpdateCoverImage from "./updateCoverImage";
 import ChangePropertyHandler from "./ChangePropertyHandler";
+import ToggleSoldButton from "./togglePropertySold";
 
 
 export default function AdminPropertyDetailComponent() {
@@ -283,6 +284,7 @@ export default function AdminPropertyDetailComponent() {
           <UpdateCoverImage propertyId={property.id} images={images} coverImageId={property?.coverImage?.id} text="Update Cover Image" />
           <DeletePropertyButton id={property.id} isActive={property.isActive} />
           <ChangePropertyHandler propertyId={property.id} currentHandler={property.handler}/>
+          <ToggleSoldButton id={property.id} isSold = {property.isSold}/>
 
         </div>
 

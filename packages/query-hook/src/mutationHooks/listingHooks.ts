@@ -355,3 +355,19 @@ export const useChangePropertyHandler = () => {
     }
   })
 }
+
+export const useTogglePropertySold = () => {
+  return useMutation({
+    mutationFn: async (id:string) => {
+       return authenticatedFetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/listing/toggle-sold/${id}`,
+        {
+          method: "PUT",
+        }
+      );
+    },
+     onError: (error) => {
+      toast.error(error.message || "Operation Failed!!!");
+    }
+  })
+}

@@ -242,6 +242,7 @@ export const getUserListings = async (req: Request, res: Response) => {
           tole: true,
           propertyCode: true,
           isFeatured: true,
+          isSold:true,
           verified: true,
           coverImage: {
             select: {
@@ -414,7 +415,6 @@ export async function checkFavourite(req: Request, res: Response) {
 
     return res.status(200).json({ result: !!existing });
   } catch (err) {
-
     return res.status(200).json({
       result: false,
     });
@@ -465,7 +465,6 @@ export async function fetchUserFavourites(req: Request, res: Response) {
       result,
     });
   } catch (err) {
-
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -485,6 +484,14 @@ export async function getAllProperties(req: Request, res: Response) {
       isVerifiedQuery === "true"
         ? true
         : isVerifiedQuery === "false"
+          ? false
+          : undefined;
+
+    const isSoldQuery = queries.isSold || "";
+    const filterSold =
+      isSoldQuery === "true"
+        ? true
+        : isSoldQuery === "false"
           ? false
           : undefined;
 
@@ -522,13 +529,14 @@ export async function getAllProperties(req: Request, res: Response) {
       ? (typeQuery as "rent" | "sale")
       : undefined;
 
-    const numQ = q && !isNaN(Number(q)) ? parseInt(q, 10) : null;
+    const numQ = q && /^\d{1,6}$/.test(q) ? Number(q) : null;
 
     const where: Prisma.PropertyWhereInput = {
       ...(filterVerified !== undefined && { verified: filterVerified }),
       ...(filterActive !== undefined && { isActive: filterActive }),
       ...(filterFeature !== undefined && { isFeatured: filterFeature }),
       ...(filterType !== undefined && { type: filterType }),
+      ...(filterSold !== undefined && { isSold: filterSold }),
       ...(c_id && { categoryId: c_id }),
       ...(staffId && { handlerId: staffId }),
       ...(q && {
@@ -568,6 +576,7 @@ export async function getAllProperties(req: Request, res: Response) {
           isFeatured: true,
           price: true,
           propertyCode: true,
+          isSold:true,
           tole: true,
           createdAt: true,
           coverImage: {
@@ -658,7 +667,6 @@ export async function updateProperty(req: Request, res: Response) {
       deleteImageIds = [];
     }
 
-
     const parsed = {
       ...normalized,
       lat: normalized.lat ? Number(normalized.lat) : null,
@@ -719,7 +727,7 @@ export async function updateProperty(req: Request, res: Response) {
         message: err.message,
       });
     }
- 
+
     return res.status(500).json({
       message: "Internal Server Error",
     });
@@ -883,8 +891,7 @@ export async function deleteProperty(req: Request, res: Response) {
         const filePath = path.join(IMAGE_DIR, path.basename(url));
         try {
           await fs.promises.unlink(filePath);
-        } catch (err) {
-        }
+        } catch (err) {}
       }),
     );
 
@@ -1056,16 +1063,16 @@ export async function updateCoverImage(req: Request, res: Response) {
     if (!existingProperty) {
       throw new AppError(
         404,
-        "The property you are trying to update does not exist.",
+        "The property you are trying to update does not exist, or you don't have permission to update property!!!",
       );
     }
 
-    if (existingProperty?.userId !== user.id && user.role !== "admin") {
-      throw new AppError(
-        403,
-        "You are unauthorized to perform this operation!!!",
-      );
-    }
+    // if (existingProperty?.userId !== user.id && user.role !== "admin") {
+    //   throw new AppError(
+    //     403,
+    //     "You are unauthorized to perform this operation!!!",
+    //   );
+    // }
 
     await prisma.property.update({
       where: { id },
@@ -1121,10 +1128,7 @@ export const changePropertyHandler = async (req: Request, res: Response) => {
     }
 
     if (!reason || !reason.trim()) {
-      throw new AppError(
-        400,
-        "Reason for changing handler is required",
-      );
+      throw new AppError(400, "Reason for changing handler is required");
     }
 
     const handlerId = rawHandlerId as string;
@@ -1147,10 +1151,7 @@ export const changePropertyHandler = async (req: Request, res: Response) => {
 
       // "own" permission means the actor must currently
       // be the handler of this property.
-      if (
-        scope === "own" &&
-        existingProperty.handlerId !== user.id
-      ) {
+      if (scope === "own" && existingProperty.handlerId !== user.id) {
         throw new AppError(
           403,
           "You are not permitted to change the handler of this property",
@@ -1166,10 +1167,7 @@ export const changePropertyHandler = async (req: Request, res: Response) => {
         },
       });
 
-      if (
-        !handler ||
-        (handler.role !== "staff" && handler.role !== "admin")
-      ) {
+      if (!handler || (handler.role !== "staff" && handler.role !== "admin")) {
         throw new AppError(400, "Invalid handler ID");
       }
 
@@ -1289,6 +1287,81 @@ export async function fetchLocationData(req: Request, res: Response) {
     }
     return res.status(500).json({
       message: "Internal Server Error",
+    });
+  }
+}
+
+export async function togglePropertySoldOut(req: Request, res: Response) {
+  try {
+    const user = req.user;
+    const scope = req.permissionScope || "own";
+    const { id } = req.params;
+
+    if (!id || Array.isArray(id)) {
+      throw new AppError(400, "Property Id is required!!!");
+    }
+
+    const whereCondition = {
+      id: id,
+      ...(scope === "own" &&
+        (user.role === "client"
+          ? { userId: user.id }
+          : { handlerId: user.id })),
+    };
+
+    await prisma.$transaction(async (tx) => {
+      const property = await tx.property.findUnique({
+        where: whereCondition,
+      });
+
+      if (!property) {
+        throw new AppError(
+          404,
+          "The property you are looking to update doesn't exist or you mayn't have permission to update property!!!",
+        );
+      }
+
+      await tx.property.update({
+        where: { id: property.id },
+        data: {
+          isSold: !property.isSold,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: user.id,
+          actorType: user.role,
+          actorName: user.name,
+          action: "UPDATE",
+          entityType: "Property",
+          entityId: property.propertyCode.toString(),
+
+          oldValues: {
+            propertyCode: property.propertyCode,
+            isSold: property.isSold,
+          },
+
+          newValues: {
+            propertyCode: property.propertyCode,
+            isSold: !property.isSold,
+          },
+        },
+      });
+    });
+
+    return res.status(200).json({
+      message: "Update Successfully!!!",
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.status).json({
+        message: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal Server Error!!!",
     });
   }
 }
