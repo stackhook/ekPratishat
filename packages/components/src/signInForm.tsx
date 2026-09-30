@@ -41,7 +41,8 @@ export default function SignInForm({ label }: SignInProps) {
         if (data?.ok) {
           toast.success("Login Successful!!!");
           queryClient.clear();
-          router.replace("/");
+          // router.replace("/");
+          window.location.href = "/";
         } else if (data?.error) {
           toast.error(data.error || "Something Happened");
         } else {
