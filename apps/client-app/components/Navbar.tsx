@@ -49,7 +49,7 @@ const primaryLinks = [
 const propertyLinks = [
   { label: "Buy", href: "/properties?type=sale" },
   { label: "Rent", href: "/properties?type=rent" },
-  { label: "Sell", href: "/user/add-property" },
+  // { label: "Sell", href: "/user/add-property" },
 ];
 
 const NAV_HEIGHT_MOBILE = 96;
@@ -808,6 +808,7 @@ const Navbar = () => {
                   <Link
                     key={item.label}
                     href={item.href}
+                    prefetch={false}
                     className="group rounded-lg border border-white/65 bg-white/60 px-3 py-4 text-center text-sm font-black uppercase tracking-[0.16em] text-secondary-900 transition hover:border-gold-500/70 hover:bg-white/85 hover:text-gold-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 dark:border-[var(--ek-dark-border)] dark:bg-[rgba(247,241,227,0.08)] dark:text-[var(--ek-dark-text)] dark:hover:border-[var(--ek-dark-border-strong)] dark:hover:bg-[rgba(229,184,62,0.14)] dark:hover:text-[var(--ek-dark-text)]"
                     onClick={closeMenu}
                   >
