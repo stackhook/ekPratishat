@@ -19,12 +19,12 @@ const displayCards = [
     image: "/marketing/hero-rent-900.jpg",
     alt: "Premium apartment living room with warm natural light",
   },
-  // {
-  //   heading: "Sell",
-  //   href: "/user/add-property",
-  //   image: "/marketing/hero-sell-900.jpg",
-  //   alt: "Premium modern house with a bright facade",
-  // },
+  {
+    heading: "Sell",
+    href: "/user/add-property",
+    image: "/marketing/hero-sell-900.jpg",
+    alt: "Premium modern house with a bright facade",
+  },
 ];
 
 const HeroSection = async () => {

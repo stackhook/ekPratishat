@@ -67,7 +67,7 @@ const footerColumns = [
   {
     title: "Services",
     links: [
-      { label: "List a Property", href: "", icon: Building2 },
+      // { label: "List a Property", href: "", icon: Building2 },
       { label: "Home Loans", href: "#", icon: Calculator },
       { label: "Unit Converter", href: "/unit-converter", icon: Calculator },
       { label: "Property Valuation", href: "#", icon: FileCheck },

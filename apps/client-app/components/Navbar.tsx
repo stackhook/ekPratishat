@@ -49,7 +49,7 @@ const primaryLinks = [
 const propertyLinks = [
   { label: "Buy", href: "/properties?type=sale" },
   { label: "Rent", href: "/properties?type=rent" },
-  // { label: "Sell", href: "/user/add-property" },
+  { label: "Sell", href: "/user/add-property" },
 ];
 
 const NAV_HEIGHT_MOBILE = 96;
@@ -630,6 +630,7 @@ const Navbar = () => {
                     <div className="py-2">
                       <Link
                         href="/user/my-listings"
+                        prefetch={false}
                         className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-secondary-700 transition hover:bg-[#f8f1e3] hover:text-secondary-950 focus:outline-none focus-visible:bg-[#f8f1e3] dark:text-[var(--ek-dark-muted)] dark:hover:bg-[rgba(239,199,90,0.10)] dark:hover:text-[var(--ek-dark-text)]"
                         onClick={() => setIsAccountOpen(false)}
                       >
@@ -638,6 +639,7 @@ const Navbar = () => {
                       </Link>
                       <Link
                         href="/user/my-favourites"
+                        prefetch={false}
                         className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-secondary-700 transition hover:bg-[#f8f1e3] hover:text-secondary-950 focus:outline-none focus-visible:bg-[#f8f1e3] dark:text-[var(--ek-dark-muted)] dark:hover:bg-[rgba(239,199,90,0.10)] dark:hover:text-[var(--ek-dark-text)]"
                         onClick={() => setIsAccountOpen(false)}
                       >
