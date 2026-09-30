@@ -87,6 +87,7 @@ const Navbar = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: user, isLoading } = useGetUserInfo();
+  console.log("userData", user);
   const {mutate,isPending} = useLogOut();
   const { mode, isMounted: isHeroPerformanceMounted } = useHeroPerformanceMode();
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
