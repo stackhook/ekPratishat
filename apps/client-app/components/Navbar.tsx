@@ -575,8 +575,9 @@ const Navbar = () => {
           <Link
             href="/user/add-property"
             className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient text-[#100d08] shadow-lg shadow-gold-800/15 transition hover:bg-gold-gradient-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-auto sm:w-auto sm:px-4 sm:py-3 lg:px-5"
-            // onClick={closeMenu}
+            onClick={closeMenu}
             aria-label="List your property"
+            prefetch={false}
           >
             <HousePlus className="h-5 w-5 sm:hidden" aria-hidden="true" />
             <span className="hidden text-xs font-bold uppercase tracking-[0.18em] sm:inline lg:hidden">
