@@ -40,6 +40,7 @@ import { revalidateTagPathAction } from "../../../../actions/revalidateAction";
 
 export default function AddProperty() {
   const { data: user, isLoading } = useGetUserInfo();
+  console.log("User", user);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { mutate, isPending } = useCreateProperty();
