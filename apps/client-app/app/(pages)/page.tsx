@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link";
 import { Categories } from "../../components/category/Categories";
 import HeroSection from "../../components/HeroSection";
@@ -7,7 +9,7 @@ import TestSessionExpiry from "../../components/Test-Expiry";
 
 
 
-export default async function Home(){
+export default function Home(){
   return <div>
     <HeroSection/>
     <HomePageFeaturedProperties/>
