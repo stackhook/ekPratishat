@@ -87,7 +87,6 @@ const Navbar = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: user, isLoading } = useGetUserInfo();
-  console.log("userData", user);
   const { mutate, isPending } = useLogOut();
   const { mode, isMounted: isHeroPerformanceMounted } = useHeroPerformanceMode();
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
@@ -568,7 +567,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-2 sm:gap-3">
 
-          {/* <Link
+        <Link
             href="/user/add-property"
             className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient text-[#100d08] shadow-lg shadow-gold-800/15 transition hover:bg-gold-gradient-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-auto sm:w-auto sm:px-4 sm:py-3 lg:px-5"
             onClick={closeMenu}
@@ -582,7 +581,7 @@ const Navbar = () => {
             <span className="hidden text-xs font-bold uppercase tracking-[0.18em] lg:inline">
               List Property
             </span>
-          </Link> */}
+          </Link>
 
 
 
@@ -645,21 +644,7 @@ const Navbar = () => {
                         <Heart className="h-4 w-4" aria-hidden="true" />
                         My Favourites
                       </Link>
-                      <Link
-                        href="/user/add-property"
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient text-[#100d08] shadow-lg shadow-gold-800/15 transition hover:bg-gold-gradient-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-auto sm:w-auto sm:px-4 sm:py-3 lg:px-5"
-                        onClick={closeMenu}
-                        aria-label="List your property"
-                        prefetch={false}
-                      >
-                        <HousePlus className="h-5 w-5 sm:hidden" aria-hidden="true" />
-                        <span className="hidden text-xs font-bold uppercase tracking-[0.18em] sm:inline lg:hidden">
-                          List
-                        </span>
-                        <span className="hidden text-xs font-bold uppercase tracking-[0.18em] lg:inline">
-                          List Property
-                        </span>
-                      </Link>
+                    
                     </div>
 
                     <div className="border-t border-[#e5d8c7] p-2 dark:border-[rgba(239,199,90,0.14)] dark:bg-[#2f291f]">
