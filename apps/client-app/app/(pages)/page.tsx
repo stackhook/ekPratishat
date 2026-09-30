@@ -11,7 +11,15 @@ export default async function Home(){
   return <div>
     <HeroSection/>
     <HomePageFeaturedProperties/>
-    <a href="/user/add-property">Add Property</a>
+      <Link
+        href="/user/add-property"
+        prefetch={false}
+        onClick={() => {
+          console.log("🔥 TEST LINK CLICK");
+        }}
+      >
+        TEST ADD PROPERTY
+      </Link>
     <Categories/>
     <RecentListings/>
     {/* <TestSessionExpiry/> */}
