@@ -50,10 +50,6 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (!pathname.startsWith("/user")) {
-    return NextResponse.next();
-  }
-
   const accessToken = req.cookies.get("accessToken")?.value;
   const sessionPresent = req.cookies.get("sessionPresent")?.value;
 
@@ -74,3 +70,9 @@ export function middleware(req: NextRequest) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: [
+    '/user/:path*',
+  ],
+};
