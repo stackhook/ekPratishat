@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Categories } from "../../components/category/Categories";
 import HeroSection from "../../components/HeroSection";
 import { HomePageFeaturedProperties } from "../../components/properties/HomePageFeaturedProperties";
@@ -10,6 +11,7 @@ export default async function Home(){
   return <div>
     <HeroSection/>
     <HomePageFeaturedProperties/>
+    <Link href="/user/add-property">Add Property</Link>
     <Categories/>
     <RecentListings/>
     {/* <TestSessionExpiry/> */}
