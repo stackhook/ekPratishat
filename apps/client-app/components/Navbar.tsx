@@ -557,8 +557,8 @@ const Navbar = () => {
               fill
               sizes={NAV_LOGO_SIZES}
               className={`object-contain transition-opacity ${showHandoffNavLogo
-                  ? "opacity-100 duration-200"
-                  : "opacity-0 delay-75 duration-200"
+                ? "opacity-100 duration-200"
+                : "opacity-0 delay-75 duration-200"
                 }`}
               priority
               unoptimized
@@ -567,26 +567,24 @@ const Navbar = () => {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {
-            user && (
 
-              <Link
-                href="/user/add-property"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient text-[#100d08] shadow-lg shadow-gold-800/15 transition hover:bg-gold-gradient-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-auto sm:w-auto sm:px-4 sm:py-3 lg:px-5"
-                onClick={closeMenu}
-                aria-label="List your property"
-                prefetch={false}
-              >
-                <HousePlus className="h-5 w-5 sm:hidden" aria-hidden="true" />
-                <span className="hidden text-xs font-bold uppercase tracking-[0.18em] sm:inline lg:hidden">
-                  List
-                </span>
-                <span className="hidden text-xs font-bold uppercase tracking-[0.18em] lg:inline">
-                  List Property
-                </span>
-              </Link>
-            )
-          }
+          {/* <Link
+            href="/user/add-property"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient text-[#100d08] shadow-lg shadow-gold-800/15 transition hover:bg-gold-gradient-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-auto sm:w-auto sm:px-4 sm:py-3 lg:px-5"
+            onClick={closeMenu}
+            aria-label="List your property"
+            prefetch={false}
+          >
+            <HousePlus className="h-5 w-5 sm:hidden" aria-hidden="true" />
+            <span className="hidden text-xs font-bold uppercase tracking-[0.18em] sm:inline lg:hidden">
+              List
+            </span>
+            <span className="hidden text-xs font-bold uppercase tracking-[0.18em] lg:inline">
+              List Property
+            </span>
+          </Link> */}
+
+
 
 
           <div ref={accountMenuRef} className="relative">
@@ -617,8 +615,8 @@ const Navbar = () => {
                   <div
                     id="account-menu"
                     className={`absolute right-0 top-full z-[70] mt-3 w-64 overflow-hidden rounded-xl border border-[#e5d8c7] bg-[rgba(255,253,248,0.98)] text-secondary-950 shadow-[0_24px_70px_-34px_rgba(15,23,42,0.42)] transition-[opacity,transform,visibility] duration-150 ease-out dark:border-[rgba(239,199,90,0.18)] dark:bg-[#28231a] dark:text-[var(--ek-dark-text)] dark:shadow-[0_24px_70px_-28px_rgba(0,0,0,0.9)] ${isAccountOpen
-                        ? "visible translate-y-0 opacity-100"
-                        : "invisible -translate-y-2 opacity-0"
+                      ? "visible translate-y-0 opacity-100"
+                      : "invisible -translate-y-2 opacity-0"
                       }`}
                   >
                     <div className="border-b border-[#e5d8c7] px-4 py-3 dark:border-[rgba(239,199,90,0.14)] dark:bg-[#2f291f]">
@@ -646,6 +644,21 @@ const Navbar = () => {
                       >
                         <Heart className="h-4 w-4" aria-hidden="true" />
                         My Favourites
+                      </Link>
+                      <Link
+                        href="/user/add-property"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gold-gradient text-[#100d08] shadow-lg shadow-gold-800/15 transition hover:bg-gold-gradient-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-auto sm:w-auto sm:px-4 sm:py-3 lg:px-5"
+                        onClick={closeMenu}
+                        aria-label="List your property"
+                        prefetch={false}
+                      >
+                        <HousePlus className="h-5 w-5 sm:hidden" aria-hidden="true" />
+                        <span className="hidden text-xs font-bold uppercase tracking-[0.18em] sm:inline lg:hidden">
+                          List
+                        </span>
+                        <span className="hidden text-xs font-bold uppercase tracking-[0.18em] lg:inline">
+                          List Property
+                        </span>
                       </Link>
                     </div>
 
@@ -702,8 +715,8 @@ const Navbar = () => {
             aria-expanded={isOpen}
             aria-controls="site-menu-panel"
             className={`inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] shadow-lg shadow-black/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-500 sm:px-4 ${isSolid
-                ? "border border-[rgba(154,106,0,0.18)] bg-[rgba(255,253,248,0.9)] text-secondary-950 hover:border-[var(--ek-border-strong)] hover:bg-[rgba(255,253,248,0.98)] dark:border-white/[0.12] dark:bg-white/[0.045] dark:text-[var(--ek-dark-text)] dark:hover:border-[rgba(229,184,62,0.22)] dark:hover:bg-white/[0.075]"
-                : "border border-[rgba(154,106,0,0.16)] bg-[rgba(255,253,248,0.78)] text-secondary-950 hover:border-[var(--ek-border-strong)] hover:bg-[rgba(255,253,248,0.94)] dark:border-white/[0.12] dark:bg-white/[0.045] dark:text-[var(--ek-dark-text)] dark:hover:border-[rgba(229,184,62,0.22)] dark:hover:bg-white/[0.075]"
+              ? "border border-[rgba(154,106,0,0.18)] bg-[rgba(255,253,248,0.9)] text-secondary-950 hover:border-[var(--ek-border-strong)] hover:bg-[rgba(255,253,248,0.98)] dark:border-white/[0.12] dark:bg-white/[0.045] dark:text-[var(--ek-dark-text)] dark:hover:border-[rgba(229,184,62,0.22)] dark:hover:bg-white/[0.075]"
+              : "border border-[rgba(154,106,0,0.16)] bg-[rgba(255,253,248,0.78)] text-secondary-950 hover:border-[var(--ek-border-strong)] hover:bg-[rgba(255,253,248,0.94)] dark:border-white/[0.12] dark:bg-white/[0.045] dark:text-[var(--ek-dark-text)] dark:hover:border-[rgba(229,184,62,0.22)] dark:hover:bg-white/[0.075]"
               }`}
             onClick={() => {
               setIsAccountOpen(false);
@@ -722,8 +735,8 @@ const Navbar = () => {
         id="site-menu-panel"
         aria-hidden={!isOpen}
         className={`fixed inset-x-0 top-[var(--site-nav-height)] z-40 overflow-y-auto border-b border-white/45 bg-[#f8f5ef] px-5 pt-5 shadow-2xl shadow-secondary-900/10 backdrop-blur-none transition-[opacity,transform,visibility] duration-300 ease-out dark:border-[rgba(229,184,62,0.10)] dark:bg-[#171512] dark:shadow-black/40 sm:px-6 sm:pt-6 sm:backdrop-blur-sm lg:px-8 lg:backdrop-blur-md ${isOpen
-            ? "visible translate-y-0 opacity-100"
-            : "invisible -translate-y-6 opacity-0"
+          ? "visible translate-y-0 opacity-100"
+          : "invisible -translate-y-6 opacity-0"
           }`}
         style={{
           maxHeight: "calc(100dvh - var(--site-nav-height))",
