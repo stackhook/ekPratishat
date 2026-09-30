@@ -11,7 +11,7 @@ export default async function Home(){
   return <div>
     <HeroSection/>
     <HomePageFeaturedProperties/>
-    <Link href="/user/add-property">Add Property</Link>
+    <a href="/user/add-property">Add Property</a>
     <Categories/>
     <RecentListings/>
     {/* <TestSessionExpiry/> */}
