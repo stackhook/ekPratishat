@@ -49,15 +49,15 @@ export default function AddProperty() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      const timer = setTimeout(() => {
-        router.replace("/auth/signin");
-      }, 1500);
+  // useEffect(() => {
+  //   if (!isLoading && !user) {
+  //     const timer = setTimeout(() => {
+  //       router.replace("/auth/signin");
+  //     }, 1500);
 
-      return () => clearTimeout(timer);
-    }
-  }, [user, isLoading, router]);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [user, isLoading, router]);
 
   if (isLoading || !mounted) {
     return <div className="mx-auto max-w-7xl px-4 pb-12 pt-[calc(var(--site-nav-height)+2rem)]"><AddPropertySkeleton /></div>;
