@@ -32,7 +32,7 @@
 //   // if (pathname.startsWith("/auth")) {
 //   //   if (isValidToken) {
 //   //       return NextResponse.redirect(new URL("/", req.url));
-    
+
 //   //   }
 //   // }
 //   return NextResponse.next();
@@ -40,7 +40,7 @@
 
 // export const config = {
 //   matcher: [
-//     '/user/:path*', 
+//     '/user/:path*',
 //   ],
 // };
 
@@ -57,10 +57,19 @@ export function middleware(req: NextRequest) {
   const accessToken = req.cookies.get("accessToken")?.value;
   const sessionPresent = req.cookies.get("sessionPresent")?.value;
 
+  console.log("USER MIDDLEWARE", {
+    pathname,
+    accessToken: !!accessToken,
+    sessionPresent: !!sessionPresent,
+    userAgent: req.headers.get("user-agent"),
+    rsc: req.headers.get("rsc"),
+    purpose: req.headers.get("purpose"),
+    accept: req.headers.get("accept"),
+  });
+
   if (!accessToken && !sessionPresent) {
-    return NextResponse.redirect(
-      new URL("/auth/signin", req.url),
-    );
+     console.log("USER MIDDLEWARE -> REDIRECT", pathname);
+    return NextResponse.redirect(new URL("/auth/signin", req.url));
   }
 
   return NextResponse.next();
