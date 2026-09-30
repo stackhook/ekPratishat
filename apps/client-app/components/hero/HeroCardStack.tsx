@@ -196,6 +196,7 @@ export default function HeroCardStack({ cards }: HeroCardStackProps) {
                 href={card.href}
                 className="group relative block h-full w-full overflow-visible focus:outline-none focus-visible:ring-4 focus-visible:ring-gold-500"
                 aria-label={`View ${card.heading.toLowerCase()} properties`}
+                prefetch={false}
               >
                 <span
                   className={`absolute top-0 z-20 -translate-y-[65%] rounded-t-lg border border-b-0 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] transition-colors sm:-translate-y-[calc(100%-1px)] sm:px-5 sm:py-2 sm:text-base ${tabEffectClass} ${tabPositionClass} ${
